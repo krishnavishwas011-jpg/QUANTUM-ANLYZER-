@@ -3,292 +3,385 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quantum Analyzer - Auth</title>
-  <!-- Font Awesome Icons -->
+  <title>Quantum Analyzer - Login</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body {
       min-height: 100vh;
       background: radial-gradient(circle at 50% 30%, #1a0b36 0%, #0d051d 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      padding: 20px;
+      display: flex; justify-content: center; align-items: center;
+      color: #fff; padding: 20px; overflow: hidden;
     }
-
     .container {
-      width: 100%;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      border-radius: 24px;
-      padding: 40px 30px;
+      width: 100%; max-width: 400px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 24px; padding: 40px 30px;
       text-align: center;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 50px rgba(139, 92, 246, 0.1);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 50px rgba(139,92,246,0.1);
       backdrop-filter: blur(10px);
     }
-
-    .logo-area {
-      margin-bottom: 30px;
-    }
-
     .logo-icon {
-      font-size: 50px;
-      color: #a78bfa;
-      text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+      font-size: 50px; color: #a78bfa;
+      text-shadow: 0 0 20px rgba(167,139,250,0.5);
       animation: float 3s ease-in-out infinite;
     }
+    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+    .title { font-size: 24px; font-weight: 800; letter-spacing: 1.5px; color: #fff; margin: 16px 0 6px; }
+    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 30px; letter-spacing: 0.5px; min-height: 20px; }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
+    /* ── Sections ── */
+    .section { display: none; flex-direction: column; gap: 14px; }
+    .section.active { display: flex; }
 
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 35px;
-      letter-spacing: 0.5px;
-    }
-
-    /* Login State Styles */
-    .login-btn {
-      width: 100%;
-      padding: 14px 20px;
-      background: #fff;
-      color: #111827;
-      border: none;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+    /* ── Buttons ── */
+    .btn {
+      width: 100%; padding: 14px 20px;
+      border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
       transition: all 0.3s ease;
     }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; }
+    .btn-google { background: #fff; color: #111827; box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
+    .btn-google:hover:not(:disabled) { transform: translateY(-2px); background: #f9fafb; }
+    .btn-key { background: linear-gradient(135deg,#7c3aed,#a78bfa); color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
+    .btn-key:hover:not(:disabled) { transform: translateY(-2px); }
+    .btn-logout { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .btn-logout:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
+    .btn-back { background: rgba(255,255,255,0.07); color: #9ca3af; font-size: 13px; padding: 10px; border-radius: 10px; }
+    .btn-back:hover { background: rgba(255,255,255,0.12); }
 
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
-      background: #f9fafb;
+    /* ── Input ── */
+    .input-box {
+      width: 100%; padding: 13px 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(139,92,246,0.25);
+      border-radius: 12px; color: #fff; font-size: 15px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px; text-align: center;
+      outline: none; transition: border 0.3s;
     }
+    .input-box:focus { border-color: #a78bfa; }
+    .input-box::placeholder { color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
 
-    .login-btn i {
-      font-size: 18px;
-    }
+    /* ── Divider ── */
+    .divider { display: flex; align-items: center; gap: 10px; color: #4b5563; font-size: 12px; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
 
-    /* Logged In State Styles */
-    .profile-card {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .avatar-wrapper {
-      position: relative;
-      margin-bottom: 20px;
-    }
-
+    /* ── Profile Card ── */
+    .avatar-wrap { position: relative; width: 90px; height: 90px; margin: 0 auto 16px; }
     .avatar-ring {
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
+      position: absolute; inset: -4px; border-radius: 50%;
       border: 3px solid transparent;
-      border-top-color: #a78bfa;
-      border-bottom-color: #8b5cf6;
-      animation: rotate 3s linear infinite;
+      border-top-color: #a78bfa; border-bottom-color: #7c3aed;
+      animation: spin 3s linear infinite;
     }
+    @keyframes spin { 100%{transform:rotate(360deg);} }
+    .user-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #0d051d; position: relative; z-index: 2; }
+    .user-name { font-size: 18px; font-weight: 700; }
+    .user-email { font-size: 13px; color: #9ca3af; }
 
-    @keyframes rotate {
-      100% { transform: rotate(360deg); }
+    /* ── Device ID box ── */
+    .device-box {
+      background: rgba(167,139,250,0.08);
+      border: 1px dashed rgba(167,139,250,0.35);
+      border-radius: 12px; padding: 12px 16px;
+      font-size: 13px; color: #c4b5fd; font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; user-select: none; transition: background 0.2s;
     }
+    .device-box:hover { background: rgba(167,139,250,0.15); }
+    .device-box small { display: block; font-size: 10px; color: #6b7280; letter-spacing: 0; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; }
 
-    .user-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #0d051d;
-      position: relative;
-      z-index: 2;
-    }
+    /* ── Status ── */
+    .status { font-size: 12px; font-weight: 700; min-height: 18px; letter-spacing: 0.3px; }
+    .status.error   { color: #f87171; }
+    .status.success { color: #34d399; }
+    .status.info    { color: #a78bfa; }
 
-    .user-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .user-email {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 30px;
-    }
-
-    .logout-btn {
-      width: 100%;
-      padding: 12px 20px;
-      background: rgba(239, 68, 68, 0.1);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .logout-btn:hover {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .error-msg {
-      color: #ef4444;
-      font-size: 12px;
-      margin-top: 15px;
-      font-weight: 600;
-    }
+    /* ── Dot Loader ── */
+    .dots { display: flex; justify-content: center; gap: 6px; }
+    .dots span { width: 8px; height: 8px; background: #a78bfa; border-radius: 50%; animation: blink 1.2s infinite ease-in-out; }
+    .dots span:nth-child(2){animation-delay:.2s} .dots span:nth-child(3){animation-delay:.4s}
+    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.15;transform:scale(.6)} }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
+<div class="container">
+  <i class="fa-solid fa-atom logo-icon"></i>
+  <h1 class="title">QUANTUM ANALYZER</h1>
+  <p class="subtitle" id="subtitle">Choose your login method</p>
 
-  <div class="container">
-    <div class="logo-area">
-      <i class="fa-solid fa-atom logo-icon"></i>
-    </div>
-    <h1 class="title">QUANTUM ANALYZER</h1>
-    <p class="subtitle" id="statusText">Aapka account authorize karein</p>
-
-    <!-- State 1: Sign-In View -->
-    <div id="loggedOutView">
-      <button class="login-btn" id="googleLoginBtn">
-        <i class="fa-brands fa-google" style="color: #4285F4;"></i>
-        Sign in with Google
-      </button>
-    </div>
-
-    <!-- State 2: Active User View -->
-    <div id="loggedInView" class="profile-card">
-      <div class="avatar-wrapper">
-        <div class="avatar-ring"></div>
-        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar" />
-      </div>
-      <div class="user-name" id="userName">--</div>
-      <div class="user-email" id="userEmail">--</div>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
-    </div>
-
-    <!-- System Status/Errors -->
-    <div id="errorBox" class="error-msg hidden"></div>
+  <!-- ══ Section: Choose Method ══ -->
+  <div class="section active" id="secChoose">
+    <button class="btn btn-google" id="btnGoogle">
+      <i class="fa-brands fa-google" style="color:#4285F4;font-size:18px"></i>
+      Sign in with Google
+    </button>
+    <div class="divider">OR</div>
+    <button class="btn btn-key" id="btnSwitchKey">
+      <i class="fas fa-key"></i> Enter Activation Key
+    </button>
+    <button class="btn btn-back" id="btnSwitchDevice">
+      <i class="fas fa-fingerprint"></i> Register Device ID
+    </button>
   </div>
 
-  <script type="module">
-    // Modern Firebase SDK Imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithPopup, 
-      GoogleAuthProvider, 
-      signOut, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <!-- ══ Section: Key Login ══ -->
+  <div class="section" id="secKey">
+    <input type="text" id="keyInput" class="input-box" placeholder="ENTER KEY HERE..." autocomplete="off" maxlength="20">
+    <div class="dots hidden" id="keyLoader"><span></span><span></span><span></span></div>
+    <div class="status hidden" id="keyStatus"></div>
+    <button class="btn btn-back" id="btnBackFromKey"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
 
-    // Aapke dushre project ki configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyD-mE3n1d5Y77GY1-FbJ5WKpriP2LqW6HY",
-      authDomain: "quantum-anlyzer.firebaseapp.com",
-      databaseURL: "https://quantum-anlyzer-default-rtdb.firebaseio.com",
-      projectId: "quantum-anlyzer",
-      storageBucket: "quantum-anlyzer.firebasestorage.app",
-      messagingSenderId: "1066810347341",
-      appId: "1:1066810347341:web:f29a5ffe2175f0e6ca3104"
-    };
+  <!-- ══ Section: Device ID ══ -->
+  <div class="section" id="secDevice">
+    <div class="device-box" id="deviceIdBox" title="Tap to copy & send to Admin">
+      <small>Your Device ID — tap to copy</small>
+      <span id="deviceIdText">Loading...</span>
+    </div>
+    <div class="dots" id="deviceLoader"><span></span><span></span><span></span></div>
+    <div class="status info" id="deviceStatus">Waiting for Admin approval...</div>
+    <button class="btn btn-back" id="btnBackFromDevice"><i class="fas fa-arrow-left"></i> Back</button>
+  </div>
 
-    // Initialize Firebase aur Auth
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  <!-- ══ Section: Profile (logged in) ══ -->
+  <div class="section" id="secProfile">
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+    </div>
+    <div class="user-name" id="userName">--</div>
+    <div class="user-email" id="userEmail">--</div>
+    <button class="btn btn-logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // ── Config from api.py (no hardcoded secrets) ────────────
+  const API = "https://quantumpredictor-zeta.vercel.app";
+
+  async function loadConfig() {
+    try {
+      const r = await fetch(`${API}/api/firebase-config`);
+      return await r.json();
+    } catch { return null; }
+  }
+
+  // ── DOM ───────────────────────────────────────────────────
+  const subtitle         = document.getElementById("subtitle");
+  const secChoose        = document.getElementById("secChoose");
+  const secKey           = document.getElementById("secKey");
+  const secDevice        = document.getElementById("secDevice");
+  const secProfile       = document.getElementById("secProfile");
+  const btnGoogle        = document.getElementById("btnGoogle");
+  const btnSwitchKey     = document.getElementById("btnSwitchKey");
+  const btnSwitchDevice  = document.getElementById("btnSwitchDevice");
+  const btnBackFromKey   = document.getElementById("btnBackFromKey");
+  const btnBackFromDevice= document.getElementById("btnBackFromDevice");
+  const btnLogout        = document.getElementById("btnLogout");
+  const keyInput         = document.getElementById("keyInput");
+  const keyLoader        = document.getElementById("keyLoader");
+  const keyStatus        = document.getElementById("keyStatus");
+  const deviceIdBox      = document.getElementById("deviceIdBox");
+  const deviceIdText     = document.getElementById("deviceIdText");
+  const deviceLoader     = document.getElementById("deviceLoader");
+  const deviceStatus     = document.getElementById("deviceStatus");
+  const userAvatar       = document.getElementById("userAvatar");
+  const userName         = document.getElementById("userName");
+  const userEmail        = document.getElementById("userEmail");
+
+  // ── Section Switch ─────────────────────────────────────────
+  function show(sec, sub = "") {
+    [secChoose, secKey, secDevice, secProfile].forEach(s => s.classList.remove("active"));
+    sec.classList.add("active");
+    if (sub) subtitle.textContent = sub;
+  }
+
+  // ── Browser Unique ID (localStorage) ─────────────────────
+  function getBrowserId() {
+    let id = localStorage.getItem("qa_browser_id");
+    if (!id) {
+      const arr = new Uint32Array(8);
+      crypto.getRandomValues(arr);
+      id = Array.from(arr, n => n.toString(36)).join("").toUpperCase().slice(0, 12);
+      localStorage.setItem("qa_browser_id", id);
+    }
+    return id;
+  }
+
+  // ── Status helpers ────────────────────────────────────────
+  function setKeyStatus(msg, type = "info") {
+    keyStatus.textContent = msg;
+    keyStatus.className   = `status ${type}`;
+    keyStatus.classList.remove("hidden");
+  }
+
+  // ── Auto-login: saved key check ───────────────────────────
+  async function tryAutoLogin() {
+    const savedKey = localStorage.getItem("qa_saved_key");
+    if (!savedKey) return false;
+    const browserId = getBrowserId();
+    setKeyStatus("Auto-verifying saved key...", "info");
+    show(secKey, "Verifying saved key...");
+    keyLoader.classList.remove("hidden");
+    try {
+      const r = await fetch(`${API}/api/verify-key`, {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ key: savedKey, device_id: browserId }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        localStorage.setItem("qa_user_data", JSON.stringify({ expiryDate: d.expiryDate, userName: d.userName, plan: d.plan }));
+        setKeyStatus("✦ Welcome back! Redirecting...", "success");
+        setTimeout(() => window.location.href = "/home", 1000);
+        return true;
+      }
+    } catch {}
+    localStorage.removeItem("qa_saved_key");
+    keyLoader.classList.add("hidden");
+    return false;
+  }
+
+  // ── Key Input Verify ──────────────────────────────────────
+  let typingTimer;
+  keyInput.addEventListener("input", () => {
+    clearTimeout(typingTimer);
+    keyStatus.classList.add("hidden");
+    keyLoader.classList.add("hidden");
+    const key = keyInput.value.trim().toUpperCase();
+    if (!key) return;
+    keyLoader.classList.remove("hidden");
+    setKeyStatus("Verifying...", "info");
+    typingTimer = setTimeout(async () => {
+      const browserId = getBrowserId();
+      try {
+        const r = await fetch(`${API}/api/verify-key`, {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ key, device_id: browserId }),
+        });
+        const d = await r.json();
+        keyLoader.classList.add("hidden");
+        if (d.success) {
+          localStorage.setItem("qa_saved_key", key);
+          localStorage.setItem("qa_user_data", JSON.stringify({ expiryDate: d.expiryDate, userName: d.userName, plan: d.plan }));
+          setKeyStatus("✦ Access Granted! Redirecting...", "success");
+          setTimeout(() => window.location.href = "/home", 1200);
+        } else {
+          setKeyStatus(d.error || "Invalid Key", "error");
+        }
+      } catch {
+        keyLoader.classList.add("hidden");
+        setKeyStatus("Server error. Try again.", "error");
+      }
+    }, 900);
+  });
+
+  // ── Device ID Flow ────────────────────────────────────────
+  let devicePollInterval;
+
+  async function startDeviceFlow() {
+    const id = getBrowserId();
+    deviceIdText.textContent = id;
+    // Register device
+    try {
+      await fetch(`${API}/api/register-device`, {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ device_id: id }),
+      });
+    } catch {}
+    // Poll for approval
+    devicePollInterval = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/api/device-status?device_id=${id}`);
+        const d = await r.json();
+        if (d.status === "approved" && d.key) {
+          clearInterval(devicePollInterval);
+          deviceStatus.textContent = "✦ Approved! Logging in...";
+          deviceStatus.className   = "status success";
+          deviceLoader.classList.add("hidden");
+          keyInput.value = d.key;
+          keyInput.dispatchEvent(new Event("input"));
+          show(secKey, "Key received, verifying...");
+        }
+      } catch {}
+    }, 4000);
+  }
+
+  function stopDeviceFlow() {
+    clearInterval(devicePollInterval);
+  }
+
+  // ── Device ID copy ────────────────────────────────────────
+  deviceIdBox.addEventListener("click", async () => {
+    const id = deviceIdText.textContent;
+    if (id === "Loading..." || id === "COPIED!") return;
+    try { await navigator.clipboard.writeText(id); } catch {}
+    const orig = id;
+    deviceIdText.textContent = "COPIED!";
+    setTimeout(() => {
+      deviceIdText.textContent = orig;
+      window.open(`https://t.me/xx_drago?text=${encodeURIComponent(`Hello Admin ✦\n\nMera Device ID:\n\`${orig}\`\n\nPlease verify karo.`)}`, "_blank");
+    }, 900);
+  });
+
+  // ── Navigation ────────────────────────────────────────────
+  btnSwitchKey.addEventListener("click", () => show(secKey, "Enter your activation key"));
+  btnBackFromKey.addEventListener("click", () => { keyInput.value = ""; keyStatus.classList.add("hidden"); keyLoader.classList.add("hidden"); show(secChoose, "Choose your login method"); });
+  btnSwitchDevice.addEventListener("click", () => { show(secDevice, "Register your device"); startDeviceFlow(); });
+  btnBackFromDevice.addEventListener("click", () => { stopDeviceFlow(); show(secChoose, "Choose your login method"); });
+
+  // ── Google Login ──────────────────────────────────────────
+  const config = await loadConfig();
+  if (config && config.apiKey) {
+    const fbApp    = initializeApp(config);
+    const auth     = getAuth(fbApp);
     const provider = new GoogleAuthProvider();
 
-    // DOM Elements
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const loggedOutView = document.getElementById("loggedOutView");
-    const loggedInView = document.getElementById("loggedInView");
-    const userAvatar = document.getElementById("userAvatar");
-    const userName = document.getElementById("userName");
-    const userEmail = document.getElementById("userEmail");
-    const statusText = document.getElementById("statusText");
-    const errorBox = document.getElementById("errorBox");
+    btnGoogle.addEventListener("click", async () => {
+      btnGoogle.disabled = true;
+      subtitle.textContent = "Signing in...";
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        subtitle.textContent = e.message || "Login failed. Try again.";
+        btnGoogle.disabled = false;
+      }
+    });
 
-    // UI State switch function
-    function updateUI(user) {
-      errorBox.classList.add("hidden");
+    btnLogout.addEventListener("click", async () => {
+      localStorage.removeItem("qa_saved_key");
+      localStorage.removeItem("qa_user_data");
+      await signOut(auth).catch(() => {});
+    });
+
+    onAuthStateChanged(auth, user => {
+      btnGoogle.disabled = false;
       if (user) {
-        // Logged In
-        loggedOutView.classList.add("hidden");
-        loggedInView.style.display = "flex";
-        statusText.innerText = "ACCESS AUTHORIZED";
-        userName.innerText = user.displayName || "Quantum User";
-        userEmail.innerText = user.email || "";
+        userName.textContent   = user.displayName || "User";
+        userEmail.textContent  = user.email || "";
         userAvatar.src = user.photoURL || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        show(secProfile, "ACCESS AUTHORIZED");
       } else {
-        // Logged Out
-        loggedInView.style.display = "none";
-        loggedOutView.classList.remove("hidden");
-        statusText.innerText = "Aapka account authorize karein";
-      }
-    }
-
-    // Google Sign-In Event Listener
-    googleLoginBtn.addEventListener("click", async () => {
-      errorBox.classList.add("hidden");
-      try {
-        const result = await signInWithPopup(auth, provider);
-        // User parameters update automatically via Auth State Listener below
-      } catch (error) {
-        console.error("Login Error:", error);
-        errorBox.classList.remove("hidden");
-        errorBox.innerText = error.message || "Login fail ho gaya. Kripya check karein.";
+        show(secChoose, "Choose your login method");
       }
     });
+  } else {
+    btnGoogle.disabled = true;
+    subtitle.textContent = "Google login unavailable. Use activation key.";
+  }
 
-    // Logout Event Listener
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        console.error("Logout Error:", error);
-      }
-    });
-
-    // Real-time Auth State Listener (Bina page refresh ke automatic state update karta hai)
-    onAuthStateChanged(auth, (user) => {
-      updateUI(user);
-    });
-  </script>
+  // ── On Load: try auto-login ────────────────────────────────
+  window.addEventListener("load", async () => {
+    const autoLoggedIn = await tryAutoLogin();
+    if (!autoLoggedIn) show(secChoose, "Choose your login method");
+  });
+</script>
 </body>
 </html>
