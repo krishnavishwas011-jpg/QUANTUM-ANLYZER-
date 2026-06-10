@@ -211,7 +211,7 @@
   </div>
 
   <script>
-    // Updated Vercel API Domain
+    // Configured Vercel API Domain
     const API_BASE_URL = "https://flask-hello-world-nu-sooty-63.vercel.app";
     
     // Configured Google OAuth Web Client ID
@@ -250,7 +250,7 @@
 
     window.addEventListener('load', initGoogleAuth);
 
-    // UI state toggle (Purely local, no Firebase observers)
+    // UI state toggle
     function updateUI(user) {
       errorBox.classList.add("hidden");
       if (user) {
@@ -267,20 +267,16 @@
       }
     }
 
-    // Backend calling with sequential debug logs
+    // Backend calling (Clean production version)
     async function handleBackendLogin(accessToken) {
-      alert("Step 1: Google Login Successful! Token received.");
       try {
         statusText.innerText = "Authenticating with Quantum secure server...";
         
-        alert("Step 2: Vercel API ko request bhej rahe hain...");
         const response = await fetch(`${API_BASE_URL}/api/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ access_token: accessToken })
         });
-
-        alert("Step 3: Vercel API response status: " + response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -288,18 +284,16 @@
         }
 
         const data = await response.json();
-        alert("Step 4: Server response: " + JSON.stringify(data));
         
         if (data.status === "success" && data.user) {
+          // Cryptographic session signatures stored locally
           localStorage.setItem("quantum_user", JSON.stringify(data.user));
           localStorage.setItem("session_signature", data.session_signature);
           updateUI(data.user);
-          alert("Step 5: Authorization complete! UI updated.");
         } else {
           throw new Error("Session validation failed.");
         }
       } catch (error) {
-        alert("DIKKAT AA GAYI: " + error.message);
         console.error("Auth Server Connection Error:", error);
         errorBox.classList.remove("hidden");
         errorBox.innerText = error.message;
@@ -310,7 +304,7 @@
     googleLoginBtn.addEventListener("click", () => {
       errorBox.classList.add("hidden");
       if (!googleTokenClient) {
-        alert("Google GSI script loading error. Please wait a second.");
+        alert("Google API services starting up. Try again in 2 seconds.");
         return;
       }
       googleTokenClient.requestAccessToken();
