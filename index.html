@@ -3,434 +3,327 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quantum Analyzer - Login</title>
+  <title>Quantum Analyzer - Auth</title>
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Modern Google Sign-In SDK (Zero Firebase details required in frontend) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
     body {
       min-height: 100vh;
       background: radial-gradient(circle at 50% 30%, #1a0b36 0%, #0d051d 100%);
-      display: flex; justify-content: center; align-items: center;
-      color: #fff; padding: 20px; overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      padding: 20px;
     }
+
     .container {
-      width: 100%; max-width: 400px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(139,92,246,0.2);
-      border-radius: 24px; padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 24px;
+      padding: 40px 30px;
       text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 50px rgba(139,92,246,0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 50px rgba(139, 92, 246, 0.1);
       backdrop-filter: blur(10px);
     }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
     .logo-icon {
-      font-size: 50px; color: #a78bfa;
-      text-shadow: 0 0 20px rgba(167,139,250,0.5);
+      font-size: 50px;
+      color: #a78bfa;
+      text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
       animation: float 3s ease-in-out infinite;
     }
-    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
-    .title { font-size: 24px; font-weight: 800; letter-spacing: 1.5px; color: #fff; margin: 16px 0 6px; }
-    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 30px; letter-spacing: 0.5px; min-height: 20px; transition: color 0.3s; }
 
-    /* ── Sections ── */
-    .section { display: none; flex-direction: column; gap: 14px; }
-    .section.active { display: flex; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
 
-    /* ── Buttons ── */
-    .btn {
-      width: 100%; padding: 14px 20px;
-      border: none; border-radius: 14px;
-      font-size: 15px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 35px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Login Button Style */
+    .login-btn {
+      width: 100%;
+      padding: 14px 20px;
+      background: #fff;
+      color: #111827;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
     }
-    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; }
-    .btn-google { background: #fff; color: #111827; box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
-    .btn-google:hover:not(:disabled) { transform: translateY(-2px); background: #f9fafb; }
-    .btn-key { background: linear-gradient(135deg,#7c3aed,#a78bfa); color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
-    .btn-key:hover:not(:disabled) { transform: translateY(-2px); }
-    .btn-back { background: rgba(255,255,255,0.07); color: #9ca3af; font-size: 13px; padding: 10px; border-radius: 10px; }
-    .btn-back:hover { background: rgba(255,255,255,0.12); }
-    .btn-logout { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
-    .btn-logout:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
 
-    /* ── Input ── */
-    .input-box {
-      width: 100%; padding: 13px 16px;
-      background: rgba(255,255,255,0.07);
-      border: 1.5px solid rgba(139,92,246,0.25);
-      border-radius: 12px; color: #fff; font-size: 15px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 2px; text-align: center;
-      outline: none; transition: border 0.3s;
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+      background: #f9fafb;
     }
-    .input-box:focus { border-color: #a78bfa; }
-    .input-box::placeholder { color: rgba(255,255,255,0.2); letter-spacing: 1px; font-weight: 500; }
 
-    /* ── Divider ── */
-    .divider { display: flex; align-items: center; gap: 10px; color: #4b5563; font-size: 12px; }
-    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .login-btn i {
+      font-size: 18px;
+    }
 
-    /* ── Profile ── */
-    .avatar-wrap { position: relative; width: 90px; height: 90px; margin: 0 auto 16px; }
+    /* Active User View */
+    .profile-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
     .avatar-ring {
-      position: absolute; inset: -4px; border-radius: 50%;
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
       border: 3px solid transparent;
-      border-top-color: #a78bfa; border-bottom-color: #7c3aed;
-      animation: spin 3s linear infinite;
+      border-top-color: #a78bfa;
+      border-bottom-color: #8b5cf6;
+      animation: rotate 3s linear infinite;
     }
-    @keyframes spin { 100%{transform:rotate(360deg);} }
-    .user-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #0d051d; position: relative; z-index: 2; }
-    .user-name  { font-size: 18px; font-weight: 700; }
-    .user-email { font-size: 13px; color: #9ca3af; }
 
-    /* ── Device ID ── */
-    .device-box {
-      background: rgba(167,139,250,0.08);
-      border: 1px dashed rgba(167,139,250,0.35);
-      border-radius: 12px; padding: 12px 16px;
-      font-size: 13px; color: #c4b5fd; font-weight: 700; letter-spacing: 2px;
-      cursor: pointer; user-select: none; transition: background 0.2s;
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
     }
-    .device-box:hover { background: rgba(167,139,250,0.15); }
-    .device-box small { display: block; font-size: 10px; color: #6b7280; letter-spacing: 0; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; }
 
-    /* ── Status / Loader ── */
-    .status { font-size: 12px; font-weight: 700; min-height: 18px; letter-spacing: 0.3px; }
-    .status.error   { color: #f87171; }
-    .status.success { color: #34d399; }
-    .status.info    { color: #a78bfa;  }
-    .dots { display: flex; justify-content: center; gap: 6px; }
-    .dots span { width: 8px; height: 8px; background: #a78bfa; border-radius: 50%; animation: blink 1.2s infinite ease-in-out; }
-    .dots span:nth-child(2){animation-delay:.2s} .dots span:nth-child(3){animation-delay:.4s}
-    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.15;transform:scale(.6)} }
-    .hidden { display: none !important; }
+    .user-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #0d051d;
+      position: relative;
+      z-index: 2;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .user-email {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 30px;
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .error-msg {
+      color: #ef4444;
+      font-size: 12px;
+      margin-top: 15px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <i class="fa-solid fa-atom logo-icon"></i>
-  <h1 class="title">QUANTUM ANALYZER</h1>
-  <p class="subtitle" id="subtitle">Choose your login method</p>
 
-  <!-- ══ Section: Choose ══ -->
-  <div class="section active" id="secChoose">
-    <button class="btn btn-google" id="btnGoogle">
-      <i class="fa-brands fa-google" style="color:#4285F4;font-size:18px"></i>
-      Sign in with Google
-    </button>
-    <div class="divider">OR</div>
-    <button class="btn btn-key" id="btnSwitchKey">
-      <i class="fas fa-key"></i> Enter Activation Key
-    </button>
-    <button class="btn btn-back" id="btnSwitchDevice">
-      <i class="fas fa-fingerprint"></i> Register Device ID
-    </button>
-  </div>
-
-  <!-- ══ Section: Key ══ -->
-  <div class="section" id="secKey">
-    <input type="text" id="keyInput" class="input-box" placeholder="ENTER KEY HERE..." autocomplete="off" maxlength="20">
-    <div class="dots hidden" id="keyLoader"><span></span><span></span><span></span></div>
-    <div class="status hidden" id="keyStatus"></div>
-    <button class="btn btn-back" id="btnBackFromKey"><i class="fas fa-arrow-left"></i> Back</button>
-  </div>
-
-  <!-- ══ Section: Device ══ -->
-  <div class="section" id="secDevice">
-    <div class="device-box" id="deviceIdBox">
-      <small>Your Device ID — tap to copy</small>
-      <span id="deviceIdText">Loading...</span>
+  <div class="container">
+    <div class="logo-area">
+      <i class="fa-solid fa-atom logo-icon"></i>
     </div>
-    <div class="dots" id="deviceLoader"><span></span><span></span><span></span></div>
-    <div class="status info" id="deviceStatus">Waiting for Admin approval...</div>
-    <button class="btn btn-back" id="btnBackFromDevice"><i class="fas fa-arrow-left"></i> Back</button>
-  </div>
+    <h1 class="title">QUANTUM ANALYZER</h1>
+    <p class="subtitle" id="statusText">Aapka account authorize karein</p>
 
-  <!-- ══ Section: Profile ══ -->
-  <div class="section" id="secProfile">
-    <div class="avatar-wrap">
-      <div class="avatar-ring"></div>
-      <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+    <!-- State 1: Sign-In View -->
+    <div id="loggedOutView">
+      <button class="login-btn" id="googleLoginBtn">
+        <i class="fa-brands fa-google" style="color: #4285F4;"></i>
+        Sign in with Google
+      </button>
     </div>
-    <div class="user-name"  id="userName">--</div>
-    <div class="user-email" id="userEmail">--</div>
-    <button class="btn btn-logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+
+    <!-- State 2: Active User View -->
+    <div id="loggedInView" class="profile-card">
+      <div class="avatar-wrapper">
+        <div class="avatar-ring"></div>
+        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar" />
+      </div>
+      <div class="user-name" id="userName">--</div>
+      <div class="user-email" id="userEmail">--</div>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <!-- System Status/Errors -->
+    <div id="errorBox" class="error-msg hidden"></div>
   </div>
-</div>
 
-<script type="module">
-  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getAuth,
-    signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult,
-    GoogleAuthProvider,
-    signOut,
-    onAuthStateChanged,
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <script type="module">
+    // Vercel Bridge API endpoint (No trailing slash)
+    const API_BASE_URL = "https://quantumpredictor-zeta.vercel.app";
+    
+    // Configured Google OAuth Web Client ID
+    const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
 
-  // ══════════════════════════════════════════════════════════
-  // FIREBASE CONFIG — Web config publicly safe hai
-  // Apni values yahan daal do (Firebase Console > Project Settings > General)
-  // ══════════════════════════════════════════════════════════
-  const firebaseConfig = {
-    apiKey:            "AIzaSyD-mE3n1d5Y77GY1-FbJ5WKpriP2LqW6HY",
-    authDomain:        "quantum-anlyzer.firebaseapp.com",
-    projectId:         "quantum-anlyzer",
-    storageBucket:     "quantum-anlyzer.firebasestorage.app",
-    messagingSenderId: "1066810347341",
-    appId:             "1:1066810347341:web:f29a5ffe2175f0e6ca3104",
-  };
+    // DOM Elements
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loggedOutView = document.getElementById("loggedOutView");
+    const loggedInView = document.getElementById("loggedInView");
+    const userAvatar = document.getElementById("userAvatar");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const statusText = document.getElementById("statusText");
+    const errorBox = document.getElementById("errorBox");
 
-  // Vercel API base URL
-  const API = "https://quantumpredictor-zeta.vercel.app";
+    let googleTokenClient;
 
-  // ── Firebase Init ─────────────────────────────────────────
-  const fbApp    = initializeApp(firebaseConfig);
-  const auth     = getAuth(fbApp);
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-
-  // ── DOM ───────────────────────────────────────────────────
-  const subtitle          = document.getElementById("subtitle");
-  const secChoose         = document.getElementById("secChoose");
-  const secKey            = document.getElementById("secKey");
-  const secDevice         = document.getElementById("secDevice");
-  const secProfile        = document.getElementById("secProfile");
-  const btnGoogle         = document.getElementById("btnGoogle");
-  const btnSwitchKey      = document.getElementById("btnSwitchKey");
-  const btnSwitchDevice   = document.getElementById("btnSwitchDevice");
-  const btnBackFromKey    = document.getElementById("btnBackFromKey");
-  const btnBackFromDevice = document.getElementById("btnBackFromDevice");
-  const btnLogout         = document.getElementById("btnLogout");
-  const keyInput          = document.getElementById("keyInput");
-  const keyLoader         = document.getElementById("keyLoader");
-  const keyStatus         = document.getElementById("keyStatus");
-  const deviceIdBox       = document.getElementById("deviceIdBox");
-  const deviceIdText      = document.getElementById("deviceIdText");
-  const deviceLoader      = document.getElementById("deviceLoader");
-  const deviceStatus      = document.getElementById("deviceStatus");
-  const userAvatar        = document.getElementById("userAvatar");
-  const userName          = document.getElementById("userName");
-  const userEmail         = document.getElementById("userEmail");
-
-  // ── Helpers ───────────────────────────────────────────────
-  function show(sec, sub = "") {
-    [secChoose, secKey, secDevice, secProfile].forEach(s => s.classList.remove("active"));
-    sec.classList.add("active");
-    if (sub) subtitle.textContent = sub;
-  }
-
-  function getBrowserId() {
-    let id = localStorage.getItem("qa_browser_id");
-    if (!id) {
-      const arr = new Uint32Array(8);
-      crypto.getRandomValues(arr);
-      id = Array.from(arr, n => n.toString(36)).join("").toUpperCase().slice(0, 12);
-      localStorage.setItem("qa_browser_id", id);
-    }
-    return id;
-  }
-
-  function setKeyStatus(msg, type = "info") {
-    keyStatus.textContent = msg;
-    keyStatus.className   = `status ${type}`;
-    keyStatus.classList.remove("hidden");
-  }
-
-  // ── isMobile: redirect use karo, desktop pe popup ─────────
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  // ── Google Login ──────────────────────────────────────────
-  btnGoogle.addEventListener("click", async () => {
-    btnGoogle.disabled    = true;
-    subtitle.textContent  = "Google se connect ho raha hai...";
-    try {
-      if (isMobile) {
-        // Mobile: redirect (popup mobile me block hota hai)
-        await signInWithRedirect(auth, provider);
-        // Page reload hoga — getRedirectResult neeche handle karega
-      } else {
-        // Desktop: popup
-        await signInWithPopup(auth, provider);
-        // onAuthStateChanged handle karega
+    // Initialize modern Google Identity Service SDK
+    function initGoogleAuth() {
+      if (typeof google === 'undefined') {
+        setTimeout(initGoogleAuth, 100);
+        return;
       }
-    } catch (e) {
-      subtitle.textContent = "";
-      setGoogleError(e.code);
-      btnGoogle.disabled = false;
-    }
-  });
 
-  function setGoogleError(code) {
-    const msgs = {
-      "auth/popup-blocked":        "Popup block hua. Browser ka popup allow karo ya retry karo.",
-      "auth/popup-closed-by-user": "Popup band kar diya. Dobara try karo.",
-      "auth/cancelled-popup-request": "Popup cancel hua. Dobara try karo.",
-      "auth/network-request-failed":  "Network error. Internet check karo.",
-      "auth/unauthorized-domain":     "Domain authorized nahi hai. Firebase Console mein add karo.",
-    };
-    subtitle.textContent = msgs[code] || `Error: ${code}`;
-  }
-
-  // ── Redirect result check (mobile ke baad page reload pe) ─
-  try {
-    const result = await getRedirectResult(auth);
-    // Agar redirect se aaya → onAuthStateChanged handle karega
-  } catch (e) {
-    if (e.code !== "auth/no-auth-event") {
-      setGoogleError(e.code);
-    }
-  }
-
-  // ── Auth State ────────────────────────────────────────────
-  onAuthStateChanged(auth, user => {
-    btnGoogle.disabled = false;
-    if (user) {
-      userName.textContent  = user.displayName || "User";
-      userEmail.textContent = user.email || "";
-      userAvatar.src = user.photoURL || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-      show(secProfile, "ACCESS AUTHORIZED ✦");
-    } else {
-      // Sirf agar key auto-login chal nahi raha tab choose show karo
-      if (!document.querySelector(".section.active") || secProfile.classList.contains("active")) {
-        show(secChoose, "Choose your login method");
-      }
-    }
-  });
-
-  btnLogout.addEventListener("click", async () => {
-    localStorage.removeItem("qa_saved_key");
-    localStorage.removeItem("qa_user_data");
-    await signOut(auth).catch(() => {});
-    show(secChoose, "Choose your login method");
-  });
-
-  // ── Activation Key Login ──────────────────────────────────
-  async function verifyKey(key) {
-    const browserId = getBrowserId();
-    keyLoader.classList.remove("hidden");
-    setKeyStatus("Verifying...", "info");
-    try {
-      const r = await fetch(`${API}/api/verify-key`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key, device_id: browserId }),
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            await handleBackendLogin(tokenResponse.access_token);
+          }
+        },
       });
-      const d = await r.json();
-      keyLoader.classList.add("hidden");
-      if (d.success) {
-        localStorage.setItem("qa_saved_key", key);
-        localStorage.setItem("qa_user_data", JSON.stringify({
-          expiryDate: d.expiryDate,
-          userName:   d.userName,
-          plan:       d.plan,
-        }));
-        setKeyStatus("✦ Access Granted! Redirecting...", "success");
-        setTimeout(() => window.location.href = "/home", 1200);
-      } else {
-        setKeyStatus(d.error || "Invalid Key", "error");
-      }
-    } catch {
-      keyLoader.classList.add("hidden");
-      setKeyStatus("Server error. Try again.", "error");
     }
-  }
 
-  let typingTimer;
-  keyInput.addEventListener("input", () => {
-    clearTimeout(typingTimer);
-    keyStatus.classList.add("hidden");
-    keyLoader.classList.add("hidden");
-    const key = keyInput.value.trim().toUpperCase();
-    if (!key) return;
-    typingTimer = setTimeout(() => verifyKey(key), 900);
-  });
+    // Trigger initialization when script loads
+    window.addEventListener('load', initGoogleAuth);
 
-  // ── Auto-login (saved key) ────────────────────────────────
-  async function tryAutoLogin() {
-    const savedKey = localStorage.getItem("qa_saved_key");
-    if (!savedKey) return false;
-    show(secKey, "Saved key verify ho raha hai...");
-    keyInput.value = savedKey;
-    await verifyKey(savedKey);
-    return true;
-  }
+    // Dynamic UI state toggle
+    function updateUI(user) {
+      errorBox.classList.add("hidden");
+      if (user) {
+        loggedOutView.classList.add("hidden");
+        loggedInView.style.display = "flex";
+        statusText.innerText = "ACCESS AUTHORIZED";
+        userName.innerText = user.name || "Quantum User";
+        userEmail.innerText = user.email || "";
+        userAvatar.src = user.picture || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+      } else {
+        loggedInView.style.display = "none";
+        loggedOutView.classList.remove("hidden");
+        statusText.innerText = "Aapka account authorize karein";
+      }
+    }
 
-  // ── Device ID Flow ────────────────────────────────────────
-  let devicePollInterval;
-
-  async function startDeviceFlow() {
-    const id = getBrowserId();
-    deviceIdText.textContent = id;
-    try {
-      await fetch(`${API}/api/register-device`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ device_id: id }),
-      });
-    } catch {}
-    devicePollInterval = setInterval(async () => {
+    // Secure Login function that calls Vercel API
+    async function handleBackendLogin(accessToken) {
       try {
-        const r = await fetch(`${API}/api/device-status?device_id=${id}`);
-        const d = await r.json();
-        if (d.status === "approved" && d.key) {
-          clearInterval(devicePollInterval);
-          deviceStatus.textContent = "✦ Approved! Logging in...";
-          deviceStatus.className   = "status success";
-          deviceLoader.classList.add("hidden");
-          show(secKey, "Key mila, verify ho raha hai...");
-          keyInput.value = d.key;
-          await verifyKey(d.key);
+        statusText.innerText = "Authenticating with Quantum secure server...";
+        
+        const response = await fetch(`${API_BASE_URL}/api/auth`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken })
+        });
+
+        if (!response.ok) {
+          throw new Error("Bridge security validation failed.");
         }
-      } catch {}
-    }, 4000);
-  }
 
-  deviceIdBox.addEventListener("click", async () => {
-    const id = deviceIdText.textContent;
-    if (id === "Loading..." || id === "COPIED!") return;
-    try { await navigator.clipboard.writeText(id); } catch {}
-    const orig = id;
-    deviceIdText.textContent = "COPIED! ✓";
-    setTimeout(() => {
-      deviceIdText.textContent = orig;
-      window.open(
-        `https://t.me/xx_drago?text=${encodeURIComponent(`Hello Admin ✦\n\nMera Device ID:\n\`${orig}\`\n\nPlease verify karo.`)}`,
-        "_blank"
-      );
-    }, 900);
-  });
+        const data = await response.json();
+        
+        if (data.status === "success" && data.user) {
+          // Cryptographic session signature save karein storage me.
+          localStorage.setItem("quantum_user", JSON.stringify(data.user));
+          localStorage.setItem("session_signature", data.session_signature);
+          updateUI(data.user);
+        } else {
+          throw new Error("Session payload structure validation failed.");
+        }
+      } catch (error) {
+        console.error("Auth Server Connection Error:", error);
+        errorBox.classList.remove("hidden");
+        errorBox.innerText = "Security node rejected your handshake. Verify parameters.";
+        updateUI(null);
+      }
+    }
 
-  // ── Navigation ────────────────────────────────────────────
-  btnSwitchKey.addEventListener("click", () => {
-    show(secKey, "Enter your activation key");
-  });
+    // Google custom button click trigger
+    googleLoginBtn.addEventListener("click", () => {
+      errorBox.classList.add("hidden");
+      if (!googleTokenClient) {
+        errorBox.classList.remove("hidden");
+        errorBox.innerText = "Google API integration starting up. Try again in 2 seconds.";
+        return;
+      }
+      googleTokenClient.requestAccessToken();
+    });
 
-  btnBackFromKey.addEventListener("click", () => {
-    clearTimeout(typingTimer);
-    keyInput.value = "";
-    keyStatus.classList.add("hidden");
-    keyLoader.classList.add("hidden");
-    show(secChoose, "Choose your login method");
-  });
+    // Simple Logout
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("quantum_user");
+      localStorage.removeItem("session_signature");
+      updateUI(null);
+    });
 
-  btnSwitchDevice.addEventListener("click", () => {
-    show(secDevice, "Register your device");
-    startDeviceFlow();
-  });
-
-  btnBackFromDevice.addEventListener("click", () => {
-    clearInterval(devicePollInterval);
-    show(secChoose, "Choose your login method");
-  });
-
-  // ── Init ─────────────────────────────────────────────────
-  window.addEventListener("load", async () => {
-    const autoLoggedIn = await tryAutoLogin();
-    // Agar auto-login nahi chala AND koi Google redirect nahi tha
-    // to choose screen dikhao — onAuthStateChanged handle karega
-  });
-</script>
+    // Check existing login on page reload
+    const storedUser = localStorage.getItem("quantum_user");
+    if (storedUser) {
+      updateUI(JSON.parse(storedUser));
+    }
+  </script>
 </body>
 </html>
