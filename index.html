@@ -7,7 +7,7 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
-  <!-- Modern Google Sign-In SDK (Zero Firebase details required in frontend) -->
+  <!-- Modern Google Sign-In SDK (Purely Stateless) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -210,8 +210,8 @@
     <div id="errorBox" class="error-msg hidden"></div>
   </div>
 
-  <script type="module">
-    // Vercel Bridge API endpoint (No trailing slash)
+  <script>
+    // Updated Vercel API Domain
     const API_BASE_URL = "https://flask-hello-world-nu-sooty-63.vercel.app";
     
     // Configured Google OAuth Web Client ID
@@ -230,7 +230,7 @@
 
     let googleTokenClient;
 
-    // Initialize modern Google Identity Service SDK
+    // Google Sign-In SDK initialization
     function initGoogleAuth() {
       if (typeof google === 'undefined') {
         setTimeout(initGoogleAuth, 100);
@@ -248,10 +248,9 @@
       });
     }
 
-    // Trigger initialization when script loads
     window.addEventListener('load', initGoogleAuth);
 
-    // Dynamic UI state toggle
+    // UI state toggle (Purely local, no Firebase observers)
     function updateUI(user) {
       errorBox.classList.add("hidden");
       if (user) {
@@ -268,58 +267,62 @@
       }
     }
 
-    // Secure Login function that calls Vercel API
+    // Backend calling with sequential debug logs
     async function handleBackendLogin(accessToken) {
+      alert("Step 1: Google Login Successful! Token received.");
       try {
         statusText.innerText = "Authenticating with Quantum secure server...";
         
+        alert("Step 2: Vercel API ko request bhej rahe hain...");
         const response = await fetch(`${API_BASE_URL}/api/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ access_token: accessToken })
         });
 
+        alert("Step 3: Vercel API response status: " + response.status);
+
         if (!response.ok) {
-          throw new Error("Bridge security validation failed.");
+          const errorText = await response.text();
+          throw new Error("Bridge security validation failed: " + errorText);
         }
 
         const data = await response.json();
+        alert("Step 4: Server response: " + JSON.stringify(data));
         
         if (data.status === "success" && data.user) {
-          // Cryptographic session signature save karein storage me.
           localStorage.setItem("quantum_user", JSON.stringify(data.user));
           localStorage.setItem("session_signature", data.session_signature);
           updateUI(data.user);
+          alert("Step 5: Authorization complete! UI updated.");
         } else {
-          throw new Error("Session payload structure validation failed.");
+          throw new Error("Session validation failed.");
         }
       } catch (error) {
+        alert("DIKKAT AA GAYI: " + error.message);
         console.error("Auth Server Connection Error:", error);
         errorBox.classList.remove("hidden");
-        errorBox.innerText = "Security node rejected your handshake. Verify parameters.";
+        errorBox.innerText = error.message;
         updateUI(null);
       }
     }
 
-    // Google custom button click trigger
     googleLoginBtn.addEventListener("click", () => {
       errorBox.classList.add("hidden");
       if (!googleTokenClient) {
-        errorBox.classList.remove("hidden");
-        errorBox.innerText = "Google API integration starting up. Try again in 2 seconds.";
+        alert("Google GSI script loading error. Please wait a second.");
         return;
       }
       googleTokenClient.requestAccessToken();
     });
 
-    // Simple Logout
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("quantum_user");
       localStorage.removeItem("session_signature");
       updateUI(null);
     });
 
-    // Check existing login on page reload
+    // Check existing session on load
     const storedUser = localStorage.getItem("quantum_user");
     if (storedUser) {
       updateUI(JSON.parse(storedUser));
