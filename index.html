@@ -29,7 +29,7 @@
     }
     @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
     .title { font-size: 24px; font-weight: 800; letter-spacing: 1.5px; color: #fff; margin: 16px 0 6px; }
-    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 30px; letter-spacing: 0.5px; min-height: 20px; }
+    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 30px; letter-spacing: 0.5px; min-height: 20px; transition: color 0.3s; }
 
     /* ── Sections ── */
     .section { display: none; flex-direction: column; gap: 14px; }
@@ -48,10 +48,10 @@
     .btn-google:hover:not(:disabled) { transform: translateY(-2px); background: #f9fafb; }
     .btn-key { background: linear-gradient(135deg,#7c3aed,#a78bfa); color: #fff; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
     .btn-key:hover:not(:disabled) { transform: translateY(-2px); }
-    .btn-logout { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
-    .btn-logout:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
     .btn-back { background: rgba(255,255,255,0.07); color: #9ca3af; font-size: 13px; padding: 10px; border-radius: 10px; }
     .btn-back:hover { background: rgba(255,255,255,0.12); }
+    .btn-logout { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .btn-logout:hover:not(:disabled) { background: rgba(239,68,68,0.2); }
 
     /* ── Input ── */
     .input-box {
@@ -63,13 +63,13 @@
       outline: none; transition: border 0.3s;
     }
     .input-box:focus { border-color: #a78bfa; }
-    .input-box::placeholder { color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+    .input-box::placeholder { color: rgba(255,255,255,0.2); letter-spacing: 1px; font-weight: 500; }
 
     /* ── Divider ── */
     .divider { display: flex; align-items: center; gap: 10px; color: #4b5563; font-size: 12px; }
     .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
 
-    /* ── Profile Card ── */
+    /* ── Profile ── */
     .avatar-wrap { position: relative; width: 90px; height: 90px; margin: 0 auto 16px; }
     .avatar-ring {
       position: absolute; inset: -4px; border-radius: 50%;
@@ -79,10 +79,10 @@
     }
     @keyframes spin { 100%{transform:rotate(360deg);} }
     .user-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #0d051d; position: relative; z-index: 2; }
-    .user-name { font-size: 18px; font-weight: 700; }
+    .user-name  { font-size: 18px; font-weight: 700; }
     .user-email { font-size: 13px; color: #9ca3af; }
 
-    /* ── Device ID box ── */
+    /* ── Device ID ── */
     .device-box {
       background: rgba(167,139,250,0.08);
       border: 1px dashed rgba(167,139,250,0.35);
@@ -93,13 +93,11 @@
     .device-box:hover { background: rgba(167,139,250,0.15); }
     .device-box small { display: block; font-size: 10px; color: #6b7280; letter-spacing: 0; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; }
 
-    /* ── Status ── */
+    /* ── Status / Loader ── */
     .status { font-size: 12px; font-weight: 700; min-height: 18px; letter-spacing: 0.3px; }
     .status.error   { color: #f87171; }
     .status.success { color: #34d399; }
-    .status.info    { color: #a78bfa; }
-
-    /* ── Dot Loader ── */
+    .status.info    { color: #a78bfa;  }
     .dots { display: flex; justify-content: center; gap: 6px; }
     .dots span { width: 8px; height: 8px; background: #a78bfa; border-radius: 50%; animation: blink 1.2s infinite ease-in-out; }
     .dots span:nth-child(2){animation-delay:.2s} .dots span:nth-child(3){animation-delay:.4s}
@@ -113,7 +111,7 @@
   <h1 class="title">QUANTUM ANALYZER</h1>
   <p class="subtitle" id="subtitle">Choose your login method</p>
 
-  <!-- ══ Section: Choose Method ══ -->
+  <!-- ══ Section: Choose ══ -->
   <div class="section active" id="secChoose">
     <button class="btn btn-google" id="btnGoogle">
       <i class="fa-brands fa-google" style="color:#4285F4;font-size:18px"></i>
@@ -128,7 +126,7 @@
     </button>
   </div>
 
-  <!-- ══ Section: Key Login ══ -->
+  <!-- ══ Section: Key ══ -->
   <div class="section" id="secKey">
     <input type="text" id="keyInput" class="input-box" placeholder="ENTER KEY HERE..." autocomplete="off" maxlength="20">
     <div class="dots hidden" id="keyLoader"><span></span><span></span><span></span></div>
@@ -136,9 +134,9 @@
     <button class="btn btn-back" id="btnBackFromKey"><i class="fas fa-arrow-left"></i> Back</button>
   </div>
 
-  <!-- ══ Section: Device ID ══ -->
+  <!-- ══ Section: Device ══ -->
   <div class="section" id="secDevice">
-    <div class="device-box" id="deviceIdBox" title="Tap to copy & send to Admin">
+    <div class="device-box" id="deviceIdBox">
       <small>Your Device ID — tap to copy</small>
       <span id="deviceIdText">Loading...</span>
     </div>
@@ -147,13 +145,13 @@
     <button class="btn btn-back" id="btnBackFromDevice"><i class="fas fa-arrow-left"></i> Back</button>
   </div>
 
-  <!-- ══ Section: Profile (logged in) ══ -->
+  <!-- ══ Section: Profile ══ -->
   <div class="section" id="secProfile">
     <div class="avatar-wrap">
       <div class="avatar-ring"></div>
       <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
     </div>
-    <div class="user-name" id="userName">--</div>
+    <div class="user-name"  id="userName">--</div>
     <div class="user-email" id="userEmail">--</div>
     <button class="btn btn-logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
@@ -161,50 +159,68 @@
 
 <script type="module">
   import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getAuth,
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
+    GoogleAuthProvider,
+    signOut,
+    onAuthStateChanged,
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  // ── Config from api.py (no hardcoded secrets) ────────────
+  // ══════════════════════════════════════════════════════════
+  // FIREBASE CONFIG — Web config publicly safe hai
+  // Apni values yahan daal do (Firebase Console > Project Settings > General)
+  // ══════════════════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT.firebaseapp.com",
+    projectId:         "YOUR_PROJECT_ID",
+    storageBucket:     "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID",
+  };
+
+  // Vercel API base URL
   const API = "https://quantumpredictor-zeta.vercel.app";
 
-  async function loadConfig() {
-    try {
-      const r = await fetch(`${API}/api/firebase-config`);
-      return await r.json();
-    } catch { return null; }
-  }
+  // ── Firebase Init ─────────────────────────────────────────
+  const fbApp    = initializeApp(firebaseConfig);
+  const auth     = getAuth(fbApp);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
   // ── DOM ───────────────────────────────────────────────────
-  const subtitle         = document.getElementById("subtitle");
-  const secChoose        = document.getElementById("secChoose");
-  const secKey           = document.getElementById("secKey");
-  const secDevice        = document.getElementById("secDevice");
-  const secProfile       = document.getElementById("secProfile");
-  const btnGoogle        = document.getElementById("btnGoogle");
-  const btnSwitchKey     = document.getElementById("btnSwitchKey");
-  const btnSwitchDevice  = document.getElementById("btnSwitchDevice");
-  const btnBackFromKey   = document.getElementById("btnBackFromKey");
-  const btnBackFromDevice= document.getElementById("btnBackFromDevice");
-  const btnLogout        = document.getElementById("btnLogout");
-  const keyInput         = document.getElementById("keyInput");
-  const keyLoader        = document.getElementById("keyLoader");
-  const keyStatus        = document.getElementById("keyStatus");
-  const deviceIdBox      = document.getElementById("deviceIdBox");
-  const deviceIdText     = document.getElementById("deviceIdText");
-  const deviceLoader     = document.getElementById("deviceLoader");
-  const deviceStatus     = document.getElementById("deviceStatus");
-  const userAvatar       = document.getElementById("userAvatar");
-  const userName         = document.getElementById("userName");
-  const userEmail        = document.getElementById("userEmail");
+  const subtitle          = document.getElementById("subtitle");
+  const secChoose         = document.getElementById("secChoose");
+  const secKey            = document.getElementById("secKey");
+  const secDevice         = document.getElementById("secDevice");
+  const secProfile        = document.getElementById("secProfile");
+  const btnGoogle         = document.getElementById("btnGoogle");
+  const btnSwitchKey      = document.getElementById("btnSwitchKey");
+  const btnSwitchDevice   = document.getElementById("btnSwitchDevice");
+  const btnBackFromKey    = document.getElementById("btnBackFromKey");
+  const btnBackFromDevice = document.getElementById("btnBackFromDevice");
+  const btnLogout         = document.getElementById("btnLogout");
+  const keyInput          = document.getElementById("keyInput");
+  const keyLoader         = document.getElementById("keyLoader");
+  const keyStatus         = document.getElementById("keyStatus");
+  const deviceIdBox       = document.getElementById("deviceIdBox");
+  const deviceIdText      = document.getElementById("deviceIdText");
+  const deviceLoader      = document.getElementById("deviceLoader");
+  const deviceStatus      = document.getElementById("deviceStatus");
+  const userAvatar        = document.getElementById("userAvatar");
+  const userName          = document.getElementById("userName");
+  const userEmail         = document.getElementById("userEmail");
 
-  // ── Section Switch ─────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────
   function show(sec, sub = "") {
     [secChoose, secKey, secDevice, secProfile].forEach(s => s.classList.remove("active"));
     sec.classList.add("active");
     if (sub) subtitle.textContent = sub;
   }
 
-  // ── Browser Unique ID (localStorage) ─────────────────────
   function getBrowserId() {
     let id = localStorage.getItem("qa_browser_id");
     if (!id) {
@@ -216,40 +232,111 @@
     return id;
   }
 
-  // ── Status helpers ────────────────────────────────────────
   function setKeyStatus(msg, type = "info") {
     keyStatus.textContent = msg;
     keyStatus.className   = `status ${type}`;
     keyStatus.classList.remove("hidden");
   }
 
-  // ── Auto-login: saved key check ───────────────────────────
-  async function tryAutoLogin() {
-    const savedKey = localStorage.getItem("qa_saved_key");
-    if (!savedKey) return false;
-    const browserId = getBrowserId();
-    setKeyStatus("Auto-verifying saved key...", "info");
-    show(secKey, "Verifying saved key...");
-    keyLoader.classList.remove("hidden");
+  // ── isMobile: redirect use karo, desktop pe popup ─────────
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // ── Google Login ──────────────────────────────────────────
+  btnGoogle.addEventListener("click", async () => {
+    btnGoogle.disabled    = true;
+    subtitle.textContent  = "Google se connect ho raha hai...";
     try {
-      const r = await fetch(`${API}/api/verify-key`, {
-        method: "POST", headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ key: savedKey, device_id: browserId }),
-      });
-      const d = await r.json();
-      if (d.success) {
-        localStorage.setItem("qa_user_data", JSON.stringify({ expiryDate: d.expiryDate, userName: d.userName, plan: d.plan }));
-        setKeyStatus("✦ Welcome back! Redirecting...", "success");
-        setTimeout(() => window.location.href = "/home", 1000);
-        return true;
+      if (isMobile) {
+        // Mobile: redirect (popup mobile me block hota hai)
+        await signInWithRedirect(auth, provider);
+        // Page reload hoga — getRedirectResult neeche handle karega
+      } else {
+        // Desktop: popup
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged handle karega
       }
-    } catch {}
-    localStorage.removeItem("qa_saved_key");
-    keyLoader.classList.add("hidden");
-    return false;
+    } catch (e) {
+      subtitle.textContent = "";
+      setGoogleError(e.code);
+      btnGoogle.disabled = false;
+    }
+  });
+
+  function setGoogleError(code) {
+    const msgs = {
+      "auth/popup-blocked":        "Popup block hua. Browser ka popup allow karo ya retry karo.",
+      "auth/popup-closed-by-user": "Popup band kar diya. Dobara try karo.",
+      "auth/cancelled-popup-request": "Popup cancel hua. Dobara try karo.",
+      "auth/network-request-failed":  "Network error. Internet check karo.",
+      "auth/unauthorized-domain":     "Domain authorized nahi hai. Firebase Console mein add karo.",
+    };
+    subtitle.textContent = msgs[code] || `Error: ${code}`;
   }
 
-  // ── Key Input Verify ──────────────────────────────────────
+  // ── Redirect result check (mobile ke baad page reload pe) ─
+  try {
+    const result = await getRedirectResult(auth);
+    // Agar redirect se aaya → onAuthStateChanged handle karega
+  } catch (e) {
+    if (e.code !== "auth/no-auth-event") {
+      setGoogleError(e.code);
+    }
+  }
+
+  // ── Auth State ────────────────────────────────────────────
+  onAuthStateChanged(auth, user => {
+    btnGoogle.disabled = false;
+    if (user) {
+      userName.textContent  = user.displayName || "User";
+      userEmail.textContent = user.email || "";
+      userAvatar.src = user.photoURL || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+      show(secProfile, "ACCESS AUTHORIZED ✦");
+    } else {
+      // Sirf agar key auto-login chal nahi raha tab choose show karo
+      if (!document.querySelector(".section.active") || secProfile.classList.contains("active")) {
+        show(secChoose, "Choose your login method");
+      }
+    }
+  });
+
+  btnLogout.addEventListener("click", async () => {
+    localStorage.removeItem("qa_saved_key");
+    localStorage.removeItem("qa_user_data");
+    await signOut(auth).catch(() => {});
+    show(secChoose, "Choose your login method");
+  });
+
+  // ── Activation Key Login ──────────────────────────────────
+  async function verifyKey(key) {
+    const browserId = getBrowserId();
+    keyLoader.classList.remove("hidden");
+    setKeyStatus("Verifying...", "info");
+    try {
+      const r = await fetch(`${API}/api/verify-key`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, device_id: browserId }),
+      });
+      const d = await r.json();
+      keyLoader.classList.add("hidden");
+      if (d.success) {
+        localStorage.setItem("qa_saved_key", key);
+        localStorage.setItem("qa_user_data", JSON.stringify({
+          expiryDate: d.expiryDate,
+          userName:   d.userName,
+          plan:       d.plan,
+        }));
+        setKeyStatus("✦ Access Granted! Redirecting...", "success");
+        setTimeout(() => window.location.href = "/home", 1200);
+      } else {
+        setKeyStatus(d.error || "Invalid Key", "error");
+      }
+    } catch {
+      keyLoader.classList.add("hidden");
+      setKeyStatus("Server error. Try again.", "error");
+    }
+  }
+
   let typingTimer;
   keyInput.addEventListener("input", () => {
     clearTimeout(typingTimer);
@@ -257,31 +344,18 @@
     keyLoader.classList.add("hidden");
     const key = keyInput.value.trim().toUpperCase();
     if (!key) return;
-    keyLoader.classList.remove("hidden");
-    setKeyStatus("Verifying...", "info");
-    typingTimer = setTimeout(async () => {
-      const browserId = getBrowserId();
-      try {
-        const r = await fetch(`${API}/api/verify-key`, {
-          method: "POST", headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ key, device_id: browserId }),
-        });
-        const d = await r.json();
-        keyLoader.classList.add("hidden");
-        if (d.success) {
-          localStorage.setItem("qa_saved_key", key);
-          localStorage.setItem("qa_user_data", JSON.stringify({ expiryDate: d.expiryDate, userName: d.userName, plan: d.plan }));
-          setKeyStatus("✦ Access Granted! Redirecting...", "success");
-          setTimeout(() => window.location.href = "/home", 1200);
-        } else {
-          setKeyStatus(d.error || "Invalid Key", "error");
-        }
-      } catch {
-        keyLoader.classList.add("hidden");
-        setKeyStatus("Server error. Try again.", "error");
-      }
-    }, 900);
+    typingTimer = setTimeout(() => verifyKey(key), 900);
   });
+
+  // ── Auto-login (saved key) ────────────────────────────────
+  async function tryAutoLogin() {
+    const savedKey = localStorage.getItem("qa_saved_key");
+    if (!savedKey) return false;
+    show(secKey, "Saved key verify ho raha hai...");
+    keyInput.value = savedKey;
+    await verifyKey(savedKey);
+    return true;
+  }
 
   // ── Device ID Flow ────────────────────────────────────────
   let devicePollInterval;
@@ -289,14 +363,13 @@
   async function startDeviceFlow() {
     const id = getBrowserId();
     deviceIdText.textContent = id;
-    // Register device
     try {
       await fetch(`${API}/api/register-device`, {
-        method: "POST", headers: {"Content-Type":"application/json"},
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ device_id: id }),
       });
     } catch {}
-    // Poll for approval
     devicePollInterval = setInterval(async () => {
       try {
         const r = await fetch(`${API}/api/device-status?device_id=${id}`);
@@ -306,81 +379,57 @@
           deviceStatus.textContent = "✦ Approved! Logging in...";
           deviceStatus.className   = "status success";
           deviceLoader.classList.add("hidden");
+          show(secKey, "Key mila, verify ho raha hai...");
           keyInput.value = d.key;
-          keyInput.dispatchEvent(new Event("input"));
-          show(secKey, "Key received, verifying...");
+          await verifyKey(d.key);
         }
       } catch {}
     }, 4000);
   }
 
-  function stopDeviceFlow() {
-    clearInterval(devicePollInterval);
-  }
-
-  // ── Device ID copy ────────────────────────────────────────
   deviceIdBox.addEventListener("click", async () => {
     const id = deviceIdText.textContent;
     if (id === "Loading..." || id === "COPIED!") return;
     try { await navigator.clipboard.writeText(id); } catch {}
     const orig = id;
-    deviceIdText.textContent = "COPIED!";
+    deviceIdText.textContent = "COPIED! ✓";
     setTimeout(() => {
       deviceIdText.textContent = orig;
-      window.open(`https://t.me/xx_drago?text=${encodeURIComponent(`Hello Admin ✦\n\nMera Device ID:\n\`${orig}\`\n\nPlease verify karo.`)}`, "_blank");
+      window.open(
+        `https://t.me/xx_drago?text=${encodeURIComponent(`Hello Admin ✦\n\nMera Device ID:\n\`${orig}\`\n\nPlease verify karo.`)}`,
+        "_blank"
+      );
     }, 900);
   });
 
   // ── Navigation ────────────────────────────────────────────
-  btnSwitchKey.addEventListener("click", () => show(secKey, "Enter your activation key"));
-  btnBackFromKey.addEventListener("click", () => { keyInput.value = ""; keyStatus.classList.add("hidden"); keyLoader.classList.add("hidden"); show(secChoose, "Choose your login method"); });
-  btnSwitchDevice.addEventListener("click", () => { show(secDevice, "Register your device"); startDeviceFlow(); });
-  btnBackFromDevice.addEventListener("click", () => { stopDeviceFlow(); show(secChoose, "Choose your login method"); });
+  btnSwitchKey.addEventListener("click", () => {
+    show(secKey, "Enter your activation key");
+  });
 
-  // ── Google Login ──────────────────────────────────────────
-  const config = await loadConfig();
-  if (config && config.apiKey) {
-    const fbApp    = initializeApp(config);
-    const auth     = getAuth(fbApp);
-    const provider = new GoogleAuthProvider();
+  btnBackFromKey.addEventListener("click", () => {
+    clearTimeout(typingTimer);
+    keyInput.value = "";
+    keyStatus.classList.add("hidden");
+    keyLoader.classList.add("hidden");
+    show(secChoose, "Choose your login method");
+  });
 
-    btnGoogle.addEventListener("click", async () => {
-      btnGoogle.disabled = true;
-      subtitle.textContent = "Signing in...";
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e) {
-        subtitle.textContent = e.message || "Login failed. Try again.";
-        btnGoogle.disabled = false;
-      }
-    });
+  btnSwitchDevice.addEventListener("click", () => {
+    show(secDevice, "Register your device");
+    startDeviceFlow();
+  });
 
-    btnLogout.addEventListener("click", async () => {
-      localStorage.removeItem("qa_saved_key");
-      localStorage.removeItem("qa_user_data");
-      await signOut(auth).catch(() => {});
-    });
+  btnBackFromDevice.addEventListener("click", () => {
+    clearInterval(devicePollInterval);
+    show(secChoose, "Choose your login method");
+  });
 
-    onAuthStateChanged(auth, user => {
-      btnGoogle.disabled = false;
-      if (user) {
-        userName.textContent   = user.displayName || "User";
-        userEmail.textContent  = user.email || "";
-        userAvatar.src = user.photoURL || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        show(secProfile, "ACCESS AUTHORIZED");
-      } else {
-        show(secChoose, "Choose your login method");
-      }
-    });
-  } else {
-    btnGoogle.disabled = true;
-    subtitle.textContent = "Google login unavailable. Use activation key.";
-  }
-
-  // ── On Load: try auto-login ────────────────────────────────
+  // ── Init ─────────────────────────────────────────────────
   window.addEventListener("load", async () => {
     const autoLoggedIn = await tryAutoLogin();
-    if (!autoLoggedIn) show(secChoose, "Choose your login method");
+    // Agar auto-login nahi chala AND koi Google redirect nahi tha
+    // to choose screen dikhao — onAuthStateChanged handle karega
   });
 </script>
 </body>
