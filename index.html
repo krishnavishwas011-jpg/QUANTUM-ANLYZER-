@@ -13,7 +13,9 @@
   <title>Quantum Analyzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Faster+One&family=Luckiest+Guy&family=Rubik+Marker+Hatch&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *, *::before, *::after {
@@ -24,16 +26,53 @@
 
     body {
       min-height: 100vh;
-      /* आपके द्वारा मांगा गया नया लीनियर ग्रेडिएंट बैकग्राउंड */
       background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
       font-family: 'Space Grotesk', sans-serif;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      padding: 20px 10px;
     }
 
-    /* Container for Login located completely at the bottom center */
+    .app-container {
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 120px;
+    }
+
+    .preview-image {
+      width: 100vw;
+      max-width: 100vw;
+      height: auto;
+      max-height: 180vh;
+      object-fit: contain;
+      border-radius: 20px;
+      margin-top: 10px;
+      display: block;
+      transform: scale(1.15);
+      transform-origin: center top;
+    }
+
+    .promo-text {
+      margin-top: 20px;
+      color: #1E293B;
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 38px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      padding: 0 20px;
+      line-height: 1.15;
+      text-transform: uppercase;
+    }
+
     #loginView {
       position: fixed;
       bottom: 50px;
@@ -42,209 +81,87 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 100;
     }
 
-    /* Animated Button base */
-    .animated-btn {
+    .sub-btn {
       position: relative;
-      width: 60px;
-      height: 60px;
-      border-radius: 30px;
-      background: transparent;
+      width: 300px;
+      height: 50px;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #7C5CFC 0%, #c4b5fd 100%);
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 10px;
       outline: none;
       -webkit-tap-highlight-color: transparent;
-      /* Expands into a full button after 3.5s */
-      animation: expandBtn 0.8s 3.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 30px rgba(124, 92, 252, 0.45);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      animation: btnAppear 0.6s 0.3s both ease-out;
     }
 
-    .animated-btn:hover {
-      filter: brightness(0.9);
+    @keyframes btnAppear {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes expandBtn {
-      0% { 
-        width: 60px; 
-        background: transparent; 
-        border: none;
-        box-shadow: none;
-      }
-      100% {
-         width: 240px;
-         /* नए लाइट बैकग्राउंड के लिए बटन का बैकग्राउंड थोड़ा डार्क किया ताकि दिखे */
-         background: rgba(0, 0, 0, 0.05);
-         border: 1px solid rgba(0, 0, 0, 0.15);
-         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-      }
+    .sub-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 16px rgba(124, 92, 252, 0.35);
     }
 
-    /* Mover that slides the icon to the left side */
-    .icon-mover {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 32px;
-      height: 32px;
-      /* Slides left after 3.5s */
-      animation: moveMover 0.8s 3.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
+    .sub-btn .crown-icon {
+      font-size: 22px;
+      line-height: 1;
     }
 
-    @keyframes moveMover {
-      0% { left: 50%; transform: translate(-50%, -50%); }
-      100% { left: 24px; transform: translate(0, -50%); }
-    }
-
-    /* Rotater handling initial appearance and fast spin */
-    .icon-rotater {
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      transform: scale(0) rotate(0deg);
-      /* Pops up and rotates extremely fast for 2 seconds */
-      animation: popAndRotate 2s 0.5s forwards cubic-bezier(0.25, 1, 0.25, 1);
-    }
-
-    .g-logo {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    @keyframes popAndRotate {
-      0% { opacity: 0; transform: scale(0) rotate(0deg); }
-      10% { opacity: 1; transform: scale(1.1) rotate(0deg); }
-      15% { opacity: 1; transform: scale(1) rotate(0deg); }
-      80% { opacity: 1; transform: scale(1) rotate(1440deg); } /* Fast 4x smooth rotation */
-      100% { opacity: 1; transform: scale(1) rotate(1440deg); }
-    }
-
-    /* Tiny left and right boxes that spawn out of the icon */
-    .box-left, .box-right {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 8px;
-      height: 8px;
-      margin-top: -4px;
-      margin-left: -4px;
-      border-radius: 2px;
-      opacity: 0;
-    }
-
-    .box-left {
-      background: #EA4335;
-      animation: boxL 1s 2.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .box-right {
-      background: #34A853;
-      animation: boxR 1s 2.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes boxL {
-      0% { transform: translateX(0) scale(0); opacity: 0; }
-      30% { transform: translateX(-40px) scale(1); opacity: 1; }
-      70% { transform: translateX(-40px) scale(1); opacity: 1; }
-      100% { transform: translateX(0) scale(0); opacity: 0; }
-    }
-
-    @keyframes boxR {
-      0% { transform: translateX(0) scale(0); opacity: 0; }
-      30% { transform: translateX(40px) scale(1); opacity: 1; }
-      70% { transform: translateX(40px) scale(1); opacity: 1; }
-      100% { transform: translateX(0) scale(0); opacity: 0; }
-    }
-
-    /* Text revealing after expansion */
-    .btn-text {
-      position: absolute;
-      left: 70px;
-      color: #1E293B; /* लाइट बैकग्राउंड पर दिखने के लिए टेक्स्ट का रंग गहरा (Dark) किया */
-      font-weight: 600;
-      font-size: 15px;
+    .sub-btn .btn-label {
+      color: #ffffff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
       white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      /* Fades in after 4.1s */
-      animation: showText 0.5s 4.1s forwards ease-out;
     }
 
-    @keyframes showText {
-      0% { opacity: 0; transform: translateX(10px); }
-      100% { opacity: 1; transform: translateX(0); }
-    }
+    .error-msg { margin-top: 14px; font-size: 13px; color: #DC2626; text-align: center; font-weight: 500; display: none; }
 
-    .error-msg {
-      margin-top: 14px;
-      font-size: 13px;
-      color: #DC2626; /* एरर का रंग थोड़ा गहरा किया ताकि सफेद पर अच्छे से दिखे */
-      text-align: center;
-      font-weight: 500;
-      display: none;
-    }
-
-    /* Profile View Layout adjusted for clean visual */
     .profile-view {
       display: none;
       flex-direction: column;
       align-items: center;
-      background: rgba(255, 255, 255, 0.6); /* लाइट थीम के लिए बैकग्राउंड बदला */
+      background: rgba(255, 255, 255, 0.8);
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 24px;
       padding: 40px 60px;
       backdrop-filter: blur(12px);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 101;
+      width: 90%;
+      max-width: 360px;
       animation: fade-up 0.5s ease-out both;
     }
 
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
     }
 
-    .user-avatar { 
-      width: 90px; 
-      height: 90px; 
-      border-radius: 50%; 
-      object-fit: cover; 
-      margin-bottom: 16px; 
-      border: 2px solid rgba(0,0,0,0.1); 
-    }
-    
-    .status-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      color: #00838F; background: rgba(0, 131, 143, 0.08); border: 1px solid rgba(0, 131, 143, 0.2);
-      border-radius: 20px; padding: 4px 12px; margin-bottom: 12px;
-    }
-
-    .status-dot { 
-      width: 6px; height: 6px; border-radius: 50%; background: #00838F; 
-      box-shadow: 0 0 6px #00838F; animation: blink 1.5s ease-in-out infinite; 
-    }
-
+    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 2px solid rgba(0,0,0,0.1); }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #00838F; background: rgba(0, 131, 143, 0.08); border: 1px solid rgba(0, 131, 143, 0.2); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00838F; box-shadow: 0 0 6px #00838F; animation: blink 1.5s ease-in-out infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
     .user-name { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
-    .user-email { font-size: 14px; color: rgba(0, 0, 0, 0.6); margin-bottom: 30px; }
-    
-    .btn-logout {
-      width: 100%; height: 46px;
-      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px;
-      color: #DC2626; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: all 0.3s;
-    }
-
-    .btn-logout:hover { 
-      background: rgba(239, 68, 68, 0.2); 
-      border-color: rgba(239, 68, 68, 0.5); 
-      color: #B91C1C; 
-    }
+    .user-email { font-size: 14px; color: rgba(0, 0, 0, 0.6); margin-bottom: 50px; }
+    .btn-logout { width: 100%; height: 46px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px; color: #DC2626; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #B91C1C; }
 
   </style>
 </head>
@@ -252,23 +169,14 @@
 
   <canvas id="particleCanvas" style="display: none;"></canvas>
 
-  <div id="loginView">
-    <button id="googleLoginBtn" class="animated-btn" type="button">
-      <div class="box-left"></div>
-      <div class="box-right"></div>
-      
-      <div class="icon-mover">
-        <div class="icon-rotater">
-          <svg class="g-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-        </div>
-      </div>
+  <div class="app-container">
+    <img src="https://i.ibb.co/qFrMS5kW/20260611-125214.png" alt="UI Preview" class="preview-image"/>
+    <h2 class="promo-text">MAKE YOUR LIFE EASY WITH DRAGO PREDICTOR</h2>
+  </div>
 
-      <span class="btn-text">Continue with Drago</span>
+  <div id="loginView">
+    <button id="googleLoginBtn" class="sub-btn" type="button">
+      <span class="btn-label">✦ Get Started ✦</span>
     </button>
     
     <div id="errorMsg" class="error-msg"></div>
@@ -300,7 +208,6 @@
     const userName       = document.getElementById("userName");
     const userEmail      = document.getElementById("userEmail");
 
-    /* PARTICLES */
     (function(){
       const canvas = document.getElementById("particleCanvas");
       const ctx    = canvas.getContext("2d");
@@ -334,7 +241,6 @@
       resize(); tick();
     })();
 
-    /* GOOGLE AUTH */
     let tokenClient;
     function initGoogle(){
       if(typeof google==="undefined"){setTimeout(initGoogle,100);return;}
