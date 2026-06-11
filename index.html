@@ -3,183 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- CSP: Only allow scripts from trusted sources -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com 'unsafe-inline'; 
+                 style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; 
+                 connect-src 'self' https://flask-hello-world-nu-sooty-63.vercel.app https://accounts.google.com https://www.googleapis.com;
+                 img-src 'self' https: data:;">
   <title>Quantum Analyzer - Auth</title>
-  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
-  <!-- Modern Google Sign-In SDK (Purely Stateless) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
     body {
       min-height: 100vh;
       background: radial-gradient(circle at 50% 30%, #1a0b36 0%, #0d051d 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      padding: 20px;
+      display: flex; justify-content: center; align-items: center;
+      color: #fff; padding: 20px;
     }
 
     .container {
-      width: 100%;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      border-radius: 24px;
-      padding: 40px 30px;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 50px rgba(139, 92, 246, 0.1);
+      width: 100%; max-width: 400px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 24px; padding: 40px 30px; text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 50px rgba(139,92,246,0.1);
       backdrop-filter: blur(10px);
     }
 
-    .logo-area {
-      margin-bottom: 30px;
-    }
+    .logo-icon { font-size: 50px; color: #a78bfa; text-shadow: 0 0 20px rgba(167,139,250,0.5); animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
-    .logo-icon {
-      font-size: 50px;
-      color: #a78bfa;
-      text-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
-      animation: float 3s ease-in-out infinite;
-    }
+    .title { font-size: 24px; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 8px; }
+    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 35px; }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 35px;
-      letter-spacing: 0.5px;
-    }
-
-    /* Login Button Style */
     .login-btn {
-      width: 100%;
-      padding: 14px 20px;
-      background: #fff;
-      color: #111827;
-      border: none;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
+      width: 100%; padding: 14px 20px; background: #fff; color: #111827;
+      border: none; border-radius: 14px; font-size: 15px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 12px; transition: all 0.3s ease;
     }
+    .login-btn:hover { transform: translateY(-2px); background: #f9fafb; }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
-      background: #f9fafb;
-    }
+    .profile-card { display: none; flex-direction: column; align-items: center; }
 
-    .login-btn i {
-      font-size: 18px;
-    }
-
-    /* Active User View */
-    .profile-card {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .avatar-wrapper {
-      position: relative;
-      margin-bottom: 20px;
-    }
-
+    .avatar-wrapper { position: relative; margin-bottom: 20px; }
     .avatar-ring {
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      border-top-color: #a78bfa;
-      border-bottom-color: #8b5cf6;
+      position: absolute; inset: -4px; border-radius: 50%;
+      border: 3px solid transparent; border-top-color: #a78bfa; border-bottom-color: #8b5cf6;
       animation: rotate 3s linear infinite;
     }
+    @keyframes rotate { 100%{transform:rotate(360deg)} }
 
-    @keyframes rotate {
-      100% { transform: rotate(360deg); }
-    }
-
-    .user-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #0d051d;
-      position: relative;
-      z-index: 2;
-    }
-
-    .user-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .user-email {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 30px;
-    }
+    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #0d051d; position: relative; z-index: 2; }
+    .user-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .user-email { font-size: 13px; color: #9ca3af; margin-bottom: 30px; }
 
     .logout-btn {
-      width: 100%;
-      padding: 12px 20px;
-      background: rgba(239, 68, 68, 0.1);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      width: 100%; padding: 12px 20px;
+      background: rgba(239,68,68,0.1); color: #f87171;
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
     }
+    .logout-btn:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
 
-    .logout-btn:hover {
-      background: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .error-msg {
-      color: #ef4444;
-      font-size: 12px;
-      margin-top: 15px;
-      font-weight: 600;
-    }
+    .hidden { display: none !important; }
+    .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; font-weight: 600; }
   </style>
 </head>
 <body>
-
   <div class="container">
     <div class="logo-area">
       <i class="fa-solid fa-atom logo-icon"></i>
@@ -190,7 +85,7 @@
     <!-- State 1: Sign-In View -->
     <div id="loggedOutView">
       <button class="login-btn" id="googleLoginBtn">
-        <i class="fa-brands fa-google" style="color: #4285F4;"></i>
+        <i class="fa-brands fa-google" style="color:#4285F4;"></i>
         Sign in with Google
       </button>
     </div>
@@ -206,42 +101,41 @@
       <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
 
-    <!-- System Status/Errors -->
     <div id="errorBox" class="error-msg hidden"></div>
   </div>
 
   <script>
-    // Configured Vercel API Domain
     const API_BASE_URL = "https://flask-hello-world-nu-sooty-63.vercel.app";
-    
-    // Configured Google OAuth Web Client ID
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
 
-    // DOM Elements
+    // ─────────────────────────────────────────────
+    // SESSION STATE — In-memory only, never localStorage
+    // Cleared automatically when tab/browser closes
+    // ─────────────────────────────────────────────
+    let sessionState = {
+      user: null,
+      sessionSignature: null,
+    };
+
     const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const loggedOutView = document.getElementById("loggedOutView");
-    const loggedInView = document.getElementById("loggedInView");
-    const userAvatar = document.getElementById("userAvatar");
-    const userName = document.getElementById("userName");
-    const userEmail = document.getElementById("userEmail");
-    const statusText = document.getElementById("statusText");
-    const errorBox = document.getElementById("errorBox");
+    const logoutBtn      = document.getElementById("logoutBtn");
+    const loggedOutView  = document.getElementById("loggedOutView");
+    const loggedInView   = document.getElementById("loggedInView");
+    const userAvatar     = document.getElementById("userAvatar");
+    const userName       = document.getElementById("userName");
+    const userEmail      = document.getElementById("userEmail");
+    const statusText     = document.getElementById("statusText");
+    const errorBox       = document.getElementById("errorBox");
 
     let googleTokenClient;
 
-    // Google Sign-In SDK initialization
     function initGoogleAuth() {
-      if (typeof google === 'undefined') {
-        setTimeout(initGoogleAuth, 100);
-        return;
-      }
-
+      if (typeof google === 'undefined') { setTimeout(initGoogleAuth, 100); return; }
       googleTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
         callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
+          if (tokenResponse?.access_token) {
             await handleBackendLogin(tokenResponse.access_token);
           }
         },
@@ -250,16 +144,21 @@
 
     window.addEventListener('load', initGoogleAuth);
 
-    // UI state toggle
     function updateUI(user) {
       errorBox.classList.add("hidden");
+      errorBox.innerText = "";
       if (user) {
         loggedOutView.classList.add("hidden");
         loggedInView.style.display = "flex";
         statusText.innerText = "ACCESS AUTHORIZED";
-        userName.innerText = user.name || "Quantum User";
+        userName.innerText  = user.name  || "Quantum User";
         userEmail.innerText = user.email || "";
-        userAvatar.src = user.picture || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        // Validate picture URL before setting (prevent open redirect via img src)
+        if (user.picture && user.picture.startsWith("https://")) {
+          userAvatar.src = user.picture;
+        } else {
+          userAvatar.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        }
       } else {
         loggedInView.style.display = "none";
         loggedOutView.classList.remove("hidden");
@@ -267,60 +166,66 @@
       }
     }
 
-    // Backend calling (Clean production version)
     async function handleBackendLogin(accessToken) {
+      googleLoginBtn.disabled = true;
+      statusText.innerText = "Authenticating...";
+
       try {
-        statusText.innerText = "Authenticating with Quantum secure server...";
-        
         const response = await fetch(`${API_BASE_URL}/api/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ access_token: accessToken })
+          body: JSON.stringify({ access_token: accessToken }),
+          // Do NOT send credentials: "include" unless using cookies
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error("Bridge security validation failed: " + errorText);
+          // Show generic error — never expose server details
+          throw new Error("Authentication failed. Please try again.");
         }
 
         const data = await response.json();
-        
+
         if (data.status === "success" && data.user) {
-          // Cryptographic session signatures stored locally
-          localStorage.setItem("quantum_user", JSON.stringify(data.user));
-          localStorage.setItem("session_signature", data.session_signature);
+          // Store session in memory only — no localStorage
+          sessionState.user = data.user;
+          sessionState.sessionSignature = data.session_signature;
           updateUI(data.user);
         } else {
           throw new Error("Session validation failed.");
         }
       } catch (error) {
-        console.error("Auth Server Connection Error:", error);
+        // Show only safe, generic messages
         errorBox.classList.remove("hidden");
-        errorBox.innerText = error.message;
+        errorBox.innerText = "Authentication failed. Please try again.";
         updateUI(null);
+      } finally {
+        googleLoginBtn.disabled = false;
       }
     }
 
     googleLoginBtn.addEventListener("click", () => {
       errorBox.classList.add("hidden");
       if (!googleTokenClient) {
-        alert("Google API services starting up. Try again in 2 seconds.");
+        errorBox.classList.remove("hidden");
+        errorBox.innerText = "Google services loading. Please wait a moment.";
         return;
       }
+      googleLoginBtn.disabled = true;
       googleTokenClient.requestAccessToken();
     });
 
     logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("quantum_user");
-      localStorage.removeItem("session_signature");
+      // Clear in-memory session
+      sessionState = { user: null, sessionSignature: null };
+      // Revoke Google token if available
+      if (typeof google !== 'undefined') {
+        google.accounts.oauth2.revoke();
+      }
       updateUI(null);
     });
 
-    // Check existing session on load
-    const storedUser = localStorage.getItem("quantum_user");
-    if (storedUser) {
-      updateUI(JSON.parse(storedUser));
-    }
+    // No localStorage session restore — user must log in each session
+    // This is intentional: prevents stale/stolen session reuse
   </script>
 </body>
 </html>
