@@ -45,7 +45,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      margin-bottom: 120px;
+      margin-bottom: 140px;
     }
 
     .preview-image {
@@ -71,6 +71,75 @@
       padding: 0 20px;
       line-height: 1.15;
       text-transform: uppercase;
+    }
+
+    .action-cards-container {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      margin: 25px auto 10px auto;
+      padding: 0 15px;
+    }
+
+    .action-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 24px;
+      text-decoration: none;
+      text-align: left;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      transition: transform 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .action-card:active {
+      transform: scale(0.96);
+    }
+
+    .card-join {
+      background: linear-gradient(135deg, #e6e9ff 0%, #f1f3ff 100%);
+      border: 1.5px solid #cbd2f6;
+    }
+
+    .card-support {
+      background: linear-gradient(135deg, #f5f6f8 0%, #ffffff 100%);
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .card-icon {
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #000000;
+      line-height: 1.2;
+    }
+
+    .card-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748B;
+      margin-top: 1px;
+      white-space: nowrap;
     }
 
     #loginView {
@@ -113,11 +182,6 @@
       box-shadow: 0 4px 16px rgba(124, 92, 252, 0.35);
     }
 
-    .sub-btn .crown-icon {
-      font-size: 22px;
-      line-height: 1;
-    }
-
     .sub-btn .btn-label {
       color: #ffffff;
       font-family: 'Space Grotesk', sans-serif;
@@ -129,40 +193,11 @@
 
     .error-msg { margin-top: 14px; font-size: 13px; color: #DC2626; text-align: center; font-weight: 500; display: none; }
 
-    .profile-view {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 24px;
-      padding: 40px 60px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-      position: fixed;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 101;
-      width: 90%;
-      max-width: 360px;
-      animation: fade-up 0.5s ease-out both;
+    @media (max-width: 400px) {
+      .card-title { font-size: 14px; }
+      .card-subtitle { font-size: 10px; }
+      .action-card { padding: 10px 12px; }
     }
-
-    @keyframes fade-up {
-      from { opacity: 0; transform: translate(-50%, 20px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
-    }
-
-    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 2px solid rgba(0,0,0,0.1); }
-    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #00838F; background: rgba(0, 131, 143, 0.08); border: 1px solid rgba(0, 131, 143, 0.2); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00838F; box-shadow: 0 0 6px #00838F; animation: blink 1.5s ease-in-out infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .user-name { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
-    .user-email { font-size: 14px; color: rgba(0, 0, 0, 0.6); margin-bottom: 50px; }
-    .btn-logout { width: 100%; height: 46px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px; color: #DC2626; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-    .btn-logout:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #B91C1C; }
-
   </style>
 </head>
 <body>
@@ -172,6 +207,33 @@
   <div class="app-container">
     <img src="https://i.ibb.co/WNpTL7B6/1000073601.png" alt="UI Preview" class="preview-image"/>
     <h2 class="promo-text">MAKE YOUR LIFE EASY WITH DRAGO PREDICTOR</h2>
+    
+    <div class="action-cards-container">
+      <a href="https://t.me/+t_giD22Lulk0NmE1" target="_blank" class="action-card card-join">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor">
+            <path d="M21.5 2.5L2 11.5l7.5 3.5 3.5 7.5 8.5-20z M9.5 15l1.5 4 1-3.5L19 5.5 9.5 15z"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <span class="card-title">Join Channel</span>
+          <span class="card-subtitle">• Get latest updates!</span>
+        </div>
+      </a>
+      
+      <a href="https://t.me/xx_drago" target="_blank" class="action-card card-support">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor">
+            <path d="M12 2A10 10 0 0 0 2 12v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H4a8 8 0 0 1 16 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4A10 10 0 0 0 12 2z"/>
+            <path d="M6 18c0 2.5 2 4 4.5 4h1v-1.5h-1C8.5 20.5 7.5 19.5 7.4 18Z"/>
+          </svg>
+        </div>
+        <div class="card-content">
+          <span class="card-title">Customer &<br>Support</span>
+          <span class="card-subtitle">• We are here to help!</span>
+        </div>
+      </a>
+    </div>
   </div>
 
   <div id="loginView">
@@ -182,34 +244,34 @@
     <div id="errorMsg" class="error-msg"></div>
   </div>
 
-  <div id="profileView" class="profile-view">
-    <img id="userAvatar" src="" alt="avatar" class="user-avatar"/>
-    <div class="status-badge">
-      <span class="status-dot"></span>
-      Access Authorized
-    </div>
-    <div class="user-name" id="userName">--</div>
-    <div class="user-email" id="userEmail">--</div>
-    <button class="btn-logout" id="logoutBtn" type="button">Sign Out</button>
-  </div>
-
   <script>
+    // --- INSTANT SECURITY & REDIRECT CHECK ---
+    // Agar user pehle se logged-in hai to seedhe bina wait kiye send karo redirect par
+    if (localStorage.getItem("is_authenticated") === "true") {
+      window.location.replace("subscription.html");
+    }
+
     const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
 
-    let session = { user: null, signature: null };
-
     const loginView      = document.getElementById("loginView");
-    const profileView    = document.getElementById("profileView");
     const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const logoutBtn      = document.getElementById("logoutBtn");
     const errorMsg       = document.getElementById("errorMsg");
-    const userAvatar     = document.getElementById("userAvatar");
-    const userName       = document.getElementById("userName");
-    const userEmail      = document.getElementById("userEmail");
 
+    // Unique Device ID tracking function
+    function getOrCreateDeviceId() {
+      let deviceId = localStorage.getItem("drago_device_id");
+      if (!deviceId) {
+        deviceId = "device_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        localStorage.setItem("drago_device_id", deviceId);
+      }
+      return deviceId;
+    }
+
+    // Background animation code
     (function(){
       const canvas = document.getElementById("particleCanvas");
+      if(!canvas) return;
       const ctx    = canvas.getContext("2d");
       let W, H, pts = [];
       const COLS = ["#00E5FF","#7C3AED","#22D3EE","#A78BFA"];
@@ -255,32 +317,40 @@
     function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
     function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
 
-    function renderLoggedIn(user){
-      loginView.style.display   = "none";
-      profileView.style.display = "flex";
-      userName.textContent  = user.name  || "Quantum User";
-      userEmail.textContent = user.email || "";
-      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
-        ? user.picture
-        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-    }
-    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
-
     async function handleLogin(accessToken){
       googleLoginBtn.disabled = true; hideError();
+      const uniqueDeviceId = getOrCreateDeviceId();
+
       try {
-        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
-          method:"POST", headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({access_token:accessToken})
+        // Token ke sath unique device ID bhi payload me pass ki hai
+        const res = await fetch(`${API_BASE_URL}/api/auth`, {
+          method: "POST", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_token: accessToken,
+            device_id: uniqueDeviceId
+          })
         });
+        
         if(!res.ok) throw new Error();
         const data = await res.json();
-        if(data.status==="success" && data.user){
-          session = { user:data.user, signature:data.session_signature };
-          renderLoggedIn(data.user);
-        } else throw new Error();
-      } catch { showError("Authentication failed. Please try again."); }
-      finally { googleLoginBtn.disabled = false; }
+        
+        if(data.status === "success"){
+          // Login Flag set karein taaki next time auto login ho sake
+          localStorage.setItem("is_authenticated", "true");
+          if(data.user && data.user.email) {
+            localStorage.setItem("user_email_id", data.user.email);
+          }
+          
+          // Seedhe premium subscription page par redirect krein (No logout screen)
+          window.location.replace("subscription.html");
+        } else {
+          throw new Error();
+        }
+      } catch { 
+        showError("Authentication failed. Please try again."); 
+        googleLoginBtn.disabled = false;
+      }
     }
 
     googleLoginBtn.addEventListener("click", () => {
@@ -288,12 +358,6 @@
       if(!tokenClient){ showError("Google services loading. Please wait."); return; }
       googleLoginBtn.disabled = true;
       tokenClient.requestAccessToken();
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      session = {user:null,signature:null};
-      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
-      renderLoggedOut();
     });
   </script>
 </body>
