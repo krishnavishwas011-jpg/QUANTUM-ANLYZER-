@@ -1,30 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com 'unsafe-inline';
-                 style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
-                 font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-                 connect-src 'self' https://flask-hello-world-nu-sooty-63.vercel.app https://accounts.google.com https://www.googleapis.com;
-                 img-src 'self' https: data:;">
-  <title>Quantum Analyzer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Profile</title>
+  
+  <!-- Font import for Space Grotesk -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <style>
     body {
       min-height: 100vh;
-      background: #000000; /* Black background as requested */
+      margin: 0;
+      /* Image gradient: Soft pastel purple/blue to white. 
+         (Agar aapko lime green chahiye, toh aap is line ko badal kar ye likh sakte hain:
+          background: linear-gradient(180deg, #e4ffd6 0%, #f4fff0 40%, #ffffff 100%); ) */
+      background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
       font-family: 'Space Grotesk', sans-serif;
       overflow: hidden;
       display: flex;
@@ -41,6 +32,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      z-index: 10;
     }
 
     /* Animated Button base */
@@ -62,7 +54,7 @@
     }
 
     .animated-btn:hover {
-      filter: brightness(1.2);
+      filter: brightness(0.95);
     }
 
     @keyframes expandBtn {
@@ -74,9 +66,9 @@
       }
       100% {
          width: 240px;
-         background: rgba(255, 255, 255, 0.05);
-         border: 1px solid rgba(255, 255, 255, 0.15);
-         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+         background: rgba(255, 255, 255, 0.7);
+         border: 1px solid rgba(0, 0, 0, 0.12);
+         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
       }
     }
 
@@ -162,7 +154,7 @@
     .btn-text {
       position: absolute;
       left: 70px;
-      color: #FFF;
+      color: #1e293b; /* Dark slate text for better readability */
       font-weight: 600;
       font-size: 15px;
       white-space: nowrap;
@@ -180,7 +172,7 @@
     .error-msg {
       margin-top: 14px;
       font-size: 13px;
-      color: #F87171;
+      color: #DC2626;
       text-align: center;
       font-weight: 500;
       display: none;
@@ -191,13 +183,14 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.7); /* Translucent white card */
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 24px;
       padding: 40px 60px;
       backdrop-filter: blur(12px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
       animation: fade-up 0.5s ease-out both;
+      z-index: 5;
     }
 
     @keyframes fade-up {
@@ -211,53 +204,45 @@
       border-radius: 50%; 
       object-fit: cover; 
       margin-bottom: 16px; 
-      border: 2px solid rgba(255,255,255,0.2); 
+      border: 2px solid rgba(0, 0, 0, 0.08); 
     }
-    
+
     .status-badge {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      color: #00E5FF; background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.2);
+      color: #00B4D8; background: rgba(0, 180, 216, 0.08); border: 1px solid rgba(0, 180, 216, 0.2);
       border-radius: 20px; padding: 4px 12px; margin-bottom: 12px;
     }
 
     .status-dot { 
-      width: 6px; height: 6px; border-radius: 50%; background: #00E5FF; 
-      box-shadow: 0 0 6px #00E5FF; animation: blink 1.5s ease-in-out infinite; 
+      width: 6px; height: 6px; border-radius: 50%; background: #00B4D8; 
+      box-shadow: 0 0 6px #00B4D8; animation: blink 1.5s ease-in-out infinite; 
     }
 
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .user-name { font-size: 20px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px; }
-    .user-email { font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-bottom: 30px; }
-    
+    .user-name { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .user-email { font-size: 14px; color: rgba(30, 41, 59, 0.6); margin-bottom: 30px; }
+
     .btn-logout {
       width: 100%; height: 46px;
-      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px;
-      color: #F87171; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;
+      background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 14px;
+      color: #EF4444; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;
       cursor: pointer; transition: all 0.3s;
     }
 
     .btn-logout:hover { 
-      background: rgba(239, 68, 68, 0.2); 
-      border-color: rgba(239, 68, 68, 0.5); 
-      color: #EF4444; 
+      background: rgba(239, 68, 68, 0.15); 
+      border-color: rgba(239, 68, 68, 0.4); 
+      color: #DC2626; 
     }
-
   </style>
 </head>
 <body>
 
-  <!-- Hidden canvas to keep the original javascript running without errors -->
-  <canvas id="particleCanvas" style="display: none;"></canvas>
-
-  <!-- Animated Google Login -->
+  <!-- LOGIN CONTAINER -->
   <div id="loginView">
-    <button id="googleLoginBtn" class="animated-btn" type="button">
-      <!-- Tiny Boxes -->
-      <div class="box-left"></div>
-      <div class="box-right"></div>
-      
+    <button class="animated-btn" id="loginBtn">
       <!-- Google Icon Setup -->
       <div class="icon-mover">
         <div class="icon-rotater">
@@ -270,130 +255,58 @@
         </div>
       </div>
 
+      <!-- Left and right small animated boxes -->
+      <div class="box-left"></div>
+      <div class="box-right"></div>
+
       <!-- Left aligned revealing text -->
-      <span class="btn-text">Continue with Drago</span>
+      <span class="btn-text">Continue with Google</span>
     </button>
     
     <div id="errorMsg" class="error-msg"></div>
   </div>
 
-  <!-- Profile View when authorized -->
-  <div id="profileView" class="profile-view">
-    <img id="userAvatar" src="" alt="avatar" class="user-avatar"/>
+
+  <!-- PROFILE CONTAINER -->
+  <div class="profile-view" id="profileView">
+    <!-- User Avatar -->
+    <img class="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150" alt="Ivar Mods Avatar">
+    
+    <!-- Status Badge -->
     <div class="status-badge">
       <span class="status-dot"></span>
-      Access Authorized
+      Active
     </div>
-    <div class="user-name" id="userName">--</div>
-    <div class="user-email" id="userEmail">--</div>
-    <button class="btn-logout" id="logoutBtn" type="button">Sign Out</button>
+    
+    <!-- User Name and Email -->
+    <div class="user-name">Ivar Mods</div>
+    <div class="user-email">ivar@mods.ai</div>
+    
+    <!-- Logout Button -->
+    <button class="btn-logout" id="logoutBtn">Log Out</button>
   </div>
 
-  <!-- ORIGINAL FUNCTION SCRIPT (UNTOUCHED AS REQUESTED) -->
+
+  <!-- BASIC JS LOGIC FOR DEMO -->
   <script>
-    const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
-    const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
+    const loginBtn = document.getElementById('loginBtn');
+    const loginView = document.getElementById('loginView');
+    const profileView = document.getElementById('profileView');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    let session = { user: null, signature: null };
-
-    const loginView      = document.getElementById("loginView");
-    const profileView    = document.getElementById("profileView");
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const logoutBtn      = document.getElementById("logoutBtn");
-    const errorMsg       = document.getElementById("errorMsg");
-    const userAvatar     = document.getElementById("userAvatar");
-    const userName       = document.getElementById("userName");
-    const userEmail      = document.getElementById("userEmail");
-
-    /* PARTICLES */
-    (function(){
-      const canvas = document.getElementById("particleCanvas");
-      const ctx    = canvas.getContext("2d");
-      let W, H, pts = [];
-      const COLS = ["#00E5FF","#7C3AED","#22D3EE","#A78BFA"];
-      function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-      function mkp(){
-        return { x:Math.random()*W, y:H+10, r:Math.random()*2+0.5,
-                 speed:Math.random()*0.6+0.3, drift:(Math.random()-0.5)*1.5,
-                 color:COLS[Math.floor(Math.random()*COLS.length)],
-                 alpha:0, life:0, maxLife:Math.random()*200+150 };
-      }
-      function tick(){
-        ctx.clearRect(0,0,W,H);
-        if(pts.length < 45) pts.push(mkp());
-        pts = pts.filter(p => p.life < p.maxLife);
-        pts.forEach(p => {
-          p.life++; p.y -= p.speed; p.x += p.drift*0.3;
-          p.alpha = p.life < 30 ? p.life/30 : p.life > p.maxLife-30 ? (p.maxLife-p.life)/30 : 0.7;
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha*0.6; ctx.fill();
-          const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
-          g.addColorStop(0,p.color+"55"); g.addColorStop(1,p.color+"00");
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);
-          ctx.fillStyle=g; ctx.globalAlpha=p.alpha*0.3; ctx.fill();
-          ctx.globalAlpha=1;
-        });
-        requestAnimationFrame(tick);
-      }
-      window.addEventListener("resize", resize);
-      resize(); tick();
-    })();
-
-    /* GOOGLE AUTH */
-    let tokenClient;
-    function initGoogle(){
-      if(typeof google==="undefined"){setTimeout(initGoogle,100);return;}
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-        callback: async (res) => { if(res?.access_token) await handleLogin(res.access_token); }
-      });
-    }
-    window.addEventListener("load", initGoogle);
-
-    function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
-    function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
-
-    function renderLoggedIn(user){
-      loginView.style.display   = "none";
-      profileView.style.display = "flex";
-      userName.textContent  = user.name  || "Quantum User";
-      userEmail.textContent = user.email || "";
-      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
-        ? user.picture
-        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-    }
-    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
-
-    async function handleLogin(accessToken){
-      googleLoginBtn.disabled = true; hideError();
-      try {
-        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
-          method:"POST", headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({access_token:accessToken})
-        });
-        if(!res.ok) throw new Error();
-        const data = await res.json();
-        if(data.status==="success" && data.user){
-          session = { user:data.user, signature:data.session_signature };
-          renderLoggedIn(data.user);
-        } else throw new Error();
-      } catch { showError("Authentication failed. Please try again."); }
-      finally { googleLoginBtn.disabled = false; }
-    }
-
-    googleLoginBtn.addEventListener("click", () => {
-      hideError();
-      if(!tokenClient){ showError("Google services loading. Please wait."); return; }
-      googleLoginBtn.disabled = true;
-      tokenClient.requestAccessToken();
+    // Login hone par toggle karein
+    loginBtn.addEventListener('click', () => {
+      // Login container hide karein aur Profile container show karein
+      loginView.style.display = 'none';
+      profileView.style.display = 'flex';
     });
 
-    logoutBtn.addEventListener("click", () => {
-      session = {user:null,signature:null};
-      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
-      renderLoggedOut();
+    // Logout hone par toggle karein
+    logoutBtn.addEventListener('click', () => {
+      profileView.style.display = 'none';
+      loginView.style.display = 'flex';
     });
   </script>
+
 </body>
 </html>
