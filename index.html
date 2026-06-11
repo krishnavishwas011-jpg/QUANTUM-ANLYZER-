@@ -182,6 +182,11 @@
       box-shadow: 0 4px 16px rgba(124, 92, 252, 0.35);
     }
 
+    .sub-btn .crown-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
     .sub-btn .btn-label {
       color: #ffffff;
       font-family: 'Space Grotesk', sans-serif;
@@ -192,6 +197,40 @@
     }
 
     .error-msg { margin-top: 14px; font-size: 13px; color: #DC2626; text-align: center; font-weight: 500; display: none; }
+
+    .profile-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 24px;
+      padding: 40px 60px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 101;
+      width: 90%;
+      max-width: 360px;
+      animation: fade-up 0.5s ease-out both;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 2px solid rgba(0,0,0,0.1); }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #00838F; background: rgba(0, 131, 143, 0.08); border: 1px solid rgba(0, 131, 143, 0.2); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00838F; box-shadow: 0 0 6px #00838F; animation: blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .user-name { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+    .user-email { font-size: 14px; color: rgba(0, 0, 0, 0.6); margin-bottom: 50px; }
+    .btn-logout { width: 100%; height: 46px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px; color: #DC2626; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #B91C1C; }
 
     @media (max-width: 400px) {
       .card-title { font-size: 14px; }
@@ -244,34 +283,34 @@
     <div id="errorMsg" class="error-msg"></div>
   </div>
 
-  <script>
-    // --- INSTANT SECURITY & REDIRECT CHECK ---
-    // Agar user pehle se logged-in hai to seedhe bina wait kiye send karo redirect par
-    if (localStorage.getItem("is_authenticated") === "true") {
-      window.location.replace("subscription.html");
-    }
+  <div id="profileView" class="profile-view">
+    <img id="userAvatar" src="" alt="avatar" class="user-avatar"/>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Access Authorized
+    </div>
+    <div class="user-name" id="userName">--</div>
+    <div class="user-email" id="userEmail">--</div>
+    <button class="btn-logout" id="logoutBtn" type="button">Sign Out</button>
+  </div>
 
+  <script>
     const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
 
+    let session = { user: null, signature: null };
+
     const loginView      = document.getElementById("loginView");
+    const profileView    = document.getElementById("profileView");
     const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const logoutBtn      = document.getElementById("logoutBtn");
     const errorMsg       = document.getElementById("errorMsg");
+    const userAvatar     = document.getElementById("userAvatar");
+    const userName       = document.getElementById("userName");
+    const userEmail      = document.getElementById("userEmail");
 
-    // Unique Device ID tracking function
-    function getOrCreateDeviceId() {
-      let deviceId = localStorage.getItem("drago_device_id");
-      if (!deviceId) {
-        deviceId = "device_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-        localStorage.setItem("drago_device_id", deviceId);
-      }
-      return deviceId;
-    }
-
-    // Background animation code
     (function(){
       const canvas = document.getElementById("particleCanvas");
-      if(!canvas) return;
       const ctx    = canvas.getContext("2d");
       let W, H, pts = [];
       const COLS = ["#00E5FF","#7C3AED","#22D3EE","#A78BFA"];
@@ -317,40 +356,32 @@
     function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
     function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
 
+    function renderLoggedIn(user){
+      loginView.style.display   = "none";
+      profileView.style.display = "flex";
+      userName.textContent  = user.name  || "Quantum User";
+      userEmail.textContent = user.email || "";
+      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
+        ? user.picture
+        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+    }
+    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
+
     async function handleLogin(accessToken){
       googleLoginBtn.disabled = true; hideError();
-      const uniqueDeviceId = getOrCreateDeviceId();
-
       try {
-        // Token ke sath unique device ID bhi payload me pass ki hai
-        const res = await fetch(`${API_BASE_URL}/api/auth`, {
-          method: "POST", 
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            access_token: accessToken,
-            device_id: uniqueDeviceId
-          })
+        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({access_token:accessToken})
         });
-        
         if(!res.ok) throw new Error();
         const data = await res.json();
-        
-        if(data.status === "success"){
-          // Login Flag set karein taaki next time auto login ho sake
-          localStorage.setItem("is_authenticated", "true");
-          if(data.user && data.user.email) {
-            localStorage.setItem("user_email_id", data.user.email);
-          }
-          
-          // Seedhe premium subscription page par redirect krein (No logout screen)
-          window.location.replace("subscription.html");
-        } else {
-          throw new Error();
-        }
-      } catch { 
-        showError("Authentication failed. Please try again."); 
-        googleLoginBtn.disabled = false;
-      }
+        if(data.status==="success" && data.user){
+          session = { user:data.user, signature:data.session_signature };
+          renderLoggedIn(data.user);
+        } else throw new Error();
+      } catch { showError("Authentication failed. Please try again."); }
+      finally { googleLoginBtn.disabled = false; }
     }
 
     googleLoginBtn.addEventListener("click", () => {
@@ -358,6 +389,12 @@
       if(!tokenClient){ showError("Google services loading. Please wait."); return; }
       googleLoginBtn.disabled = true;
       tokenClient.requestAccessToken();
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      session = {user:null,signature:null};
+      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
+      renderLoggedOut();
     });
   </script>
 </body>
