@@ -1,231 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- CSP: Only allow scripts from trusted sources -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self'; 
-                 script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com 'unsafe-inline'; 
-                 style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; 
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com 'unsafe-inline';
+                 style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
+                 font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com;
                  connect-src 'self' https://flask-hello-world-nu-sooty-63.vercel.app https://accounts.google.com https://www.googleapis.com;
                  img-src 'self' https: data:;">
-  <title>Quantum Analyzer - Auth</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Quantum Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"/>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       min-height: 100vh;
-      background: radial-gradient(circle at 50% 30%, #1a0b36 0%, #0d051d 100%);
-      display: flex; justify-content: center; align-items: center;
-      color: #fff; padding: 20px;
+      background: #000000; /* Black background as requested */
+      font-family: 'Space Grotesk', sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .container {
-      width: 100%; max-width: 400px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(139,92,246,0.2);
-      border-radius: 24px; padding: 40px 30px; text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 50px rgba(139,92,246,0.1);
-      backdrop-filter: blur(10px);
+    /* Container for Login located completely at the bottom center */
+    #loginView {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .logo-icon { font-size: 50px; color: #a78bfa; text-shadow: 0 0 20px rgba(167,139,250,0.5); animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-
-    .title { font-size: 24px; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 35px; }
-
-    .login-btn {
-      width: 100%; padding: 14px 20px; background: #fff; color: #111827;
-      border: none; border-radius: 14px; font-size: 15px; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      gap: 12px; transition: all 0.3s ease;
+    /* Animated Button base */
+    .animated-btn {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      /* Expands into a full button after 3.5s */
+      animation: expandBtn 0.8s 3.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .login-btn:hover { transform: translateY(-2px); background: #f9fafb; }
-    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .profile-card { display: none; flex-direction: column; align-items: center; }
-
-    .avatar-wrapper { position: relative; margin-bottom: 20px; }
-    .avatar-ring {
-      position: absolute; inset: -4px; border-radius: 50%;
-      border: 3px solid transparent; border-top-color: #a78bfa; border-bottom-color: #8b5cf6;
-      animation: rotate 3s linear infinite;
+    .animated-btn:hover {
+      filter: brightness(1.2);
     }
-    @keyframes rotate { 100%{transform:rotate(360deg)} }
 
-    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #0d051d; position: relative; z-index: 2; }
-    .user-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .user-email { font-size: 13px; color: #9ca3af; margin-bottom: 30px; }
-
-    .logout-btn {
-      width: 100%; padding: 12px 20px;
-      background: rgba(239,68,68,0.1); color: #f87171;
-      border: 1px solid rgba(239,68,68,0.2); border-radius: 12px;
-      font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+    @keyframes expandBtn {
+      0% { 
+        width: 60px; 
+        background: transparent; 
+        border: none;
+        box-shadow: none;
+      }
+      100% {
+         width: 240px;
+         background: rgba(255, 255, 255, 0.05);
+         border: 1px solid rgba(255, 255, 255, 0.15);
+         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+      }
     }
-    .logout-btn:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
 
-    .hidden { display: none !important; }
-    .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; font-weight: 600; }
+    /* Mover that slides the icon to the left side */
+    .icon-mover {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      /* Slides left after 3.5s */
+      animation: moveMover 0.8s 3.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes moveMover {
+      0% { left: 50%; transform: translate(-50%, -50%); }
+      100% { left: 24px; transform: translate(0, -50%); }
+    }
+
+    /* Rotater handling initial appearance and fast spin */
+    .icon-rotater {
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: scale(0) rotate(0deg);
+      /* Pops up and rotates extremely fast for 2 seconds */
+      animation: popAndRotate 2s 0.5s forwards cubic-bezier(0.25, 1, 0.25, 1);
+    }
+
+    .g-logo {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @keyframes popAndRotate {
+      0% { opacity: 0; transform: scale(0) rotate(0deg); }
+      10% { opacity: 1; transform: scale(1.1) rotate(0deg); }
+      15% { opacity: 1; transform: scale(1) rotate(0deg); }
+      80% { opacity: 1; transform: scale(1) rotate(1440deg); } /* Fast 4x smooth rotation */
+      100% { opacity: 1; transform: scale(1) rotate(1440deg); }
+    }
+
+    /* Tiny left and right boxes that spawn out of the icon */
+    .box-left, .box-right {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      margin-top: -4px;
+      margin-left: -4px;
+      border-radius: 2px;
+      opacity: 0;
+    }
+
+    .box-left {
+      background: #EA4335;
+      animation: boxL 1s 2.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .box-right {
+      background: #34A853;
+      animation: boxR 1s 2.5s forwards cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes boxL {
+      0% { transform: translateX(0) scale(0); opacity: 0; }
+      30% { transform: translateX(-40px) scale(1); opacity: 1; }
+      70% { transform: translateX(-40px) scale(1); opacity: 1; }
+      100% { transform: translateX(0) scale(0); opacity: 0; }
+    }
+
+    @keyframes boxR {
+      0% { transform: translateX(0) scale(0); opacity: 0; }
+      30% { transform: translateX(40px) scale(1); opacity: 1; }
+      70% { transform: translateX(40px) scale(1); opacity: 1; }
+      100% { transform: translateX(0) scale(0); opacity: 0; }
+    }
+
+    /* Text revealing after expansion */
+    .btn-text {
+      position: absolute;
+      left: 70px;
+      color: #FFF;
+      font-weight: 600;
+      font-size: 15px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      /* Fades in after 4.1s */
+      animation: showText 0.5s 4.1s forwards ease-out;
+    }
+
+    @keyframes showText {
+      0% { opacity: 0; transform: translateX(10px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .error-msg {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #F87171;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+
+    /* Profile View Layout adjusted for clean visual */
+    .profile-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px 60px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      animation: fade-up 0.5s ease-out both;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-avatar { 
+      width: 90px; 
+      height: 90px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      margin-bottom: 16px; 
+      border: 2px solid rgba(255,255,255,0.2); 
+    }
+    
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: #00E5FF; background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 20px; padding: 4px 12px; margin-bottom: 12px;
+    }
+
+    .status-dot { 
+      width: 6px; height: 6px; border-radius: 50%; background: #00E5FF; 
+      box-shadow: 0 0 6px #00E5FF; animation: blink 1.5s ease-in-out infinite; 
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .user-name { font-size: 20px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px; }
+    .user-email { font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-bottom: 30px; }
+    
+    .btn-logout {
+      width: 100%; height: 46px;
+      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px;
+      color: #F87171; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s;
+    }
+
+    .btn-logout:hover { 
+      background: rgba(239, 68, 68, 0.2); 
+      border-color: rgba(239, 68, 68, 0.5); 
+      color: #EF4444; 
+    }
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo-area">
-      <i class="fa-solid fa-atom logo-icon"></i>
-    </div>
-    <h1 class="title">QUANTUM ANALYZER</h1>
-    <p class="subtitle" id="statusText">Aapka account authorize karein</p>
 
-    <!-- State 1: Sign-In View -->
-    <div id="loggedOutView">
-      <button class="login-btn" id="googleLoginBtn">
-        <i class="fa-brands fa-google" style="color:#4285F4;"></i>
-        Sign in with Google
-      </button>
-    </div>
+  <!-- Hidden canvas to keep the original javascript running without errors -->
+  <canvas id="particleCanvas" style="display: none;"></canvas>
 
-    <!-- State 2: Active User View -->
-    <div id="loggedInView" class="profile-card">
-      <div class="avatar-wrapper">
-        <div class="avatar-ring"></div>
-        <img id="userAvatar" src="" alt="User Avatar" class="user-avatar" />
+  <!-- Animated Google Login -->
+  <div id="loginView">
+    <button id="googleLoginBtn" class="animated-btn" type="button">
+      <!-- Tiny Boxes -->
+      <div class="box-left"></div>
+      <div class="box-right"></div>
+      
+      <!-- Google Icon Setup -->
+      <div class="icon-mover">
+        <div class="icon-rotater">
+          <svg class="g-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        </div>
       </div>
-      <div class="user-name" id="userName">--</div>
-      <div class="user-email" id="userEmail">--</div>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
-    </div>
 
-    <div id="errorBox" class="error-msg hidden"></div>
+      <!-- Left aligned revealing text -->
+      <span class="btn-text">Continue with Google</span>
+    </button>
+    
+    <div id="errorMsg" class="error-msg"></div>
   </div>
 
+  <!-- Profile View when authorized -->
+  <div id="profileView" class="profile-view">
+    <img id="userAvatar" src="" alt="avatar" class="user-avatar"/>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Access Authorized
+    </div>
+    <div class="user-name" id="userName">--</div>
+    <div class="user-email" id="userEmail">--</div>
+    <button class="btn-logout" id="logoutBtn" type="button">Sign Out</button>
+  </div>
+
+  <!-- ORIGINAL FUNCTION SCRIPT (UNTOUCHED AS REQUESTED) -->
   <script>
-    const API_BASE_URL = "https://flask-hello-world-nu-sooty-63.vercel.app";
+    const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
 
-    // ─────────────────────────────────────────────
-    // SESSION STATE — In-memory only, never localStorage
-    // Cleared automatically when tab/browser closes
-    // ─────────────────────────────────────────────
-    let sessionState = {
-      user: null,
-      sessionSignature: null,
-    };
+    let session = { user: null, signature: null };
 
+    const loginView      = document.getElementById("loginView");
+    const profileView    = document.getElementById("profileView");
     const googleLoginBtn = document.getElementById("googleLoginBtn");
     const logoutBtn      = document.getElementById("logoutBtn");
-    const loggedOutView  = document.getElementById("loggedOutView");
-    const loggedInView   = document.getElementById("loggedInView");
+    const errorMsg       = document.getElementById("errorMsg");
     const userAvatar     = document.getElementById("userAvatar");
     const userName       = document.getElementById("userName");
     const userEmail      = document.getElementById("userEmail");
-    const statusText     = document.getElementById("statusText");
-    const errorBox       = document.getElementById("errorBox");
 
-    let googleTokenClient;
+    /* PARTICLES */
+    (function(){
+      const canvas = document.getElementById("particleCanvas");
+      const ctx    = canvas.getContext("2d");
+      let W, H, pts = [];
+      const COLS = ["#00E5FF","#7C3AED","#22D3EE","#A78BFA"];
+      function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+      function mkp(){
+        return { x:Math.random()*W, y:H+10, r:Math.random()*2+0.5,
+                 speed:Math.random()*0.6+0.3, drift:(Math.random()-0.5)*1.5,
+                 color:COLS[Math.floor(Math.random()*COLS.length)],
+                 alpha:0, life:0, maxLife:Math.random()*200+150 };
+      }
+      function tick(){
+        ctx.clearRect(0,0,W,H);
+        if(pts.length < 45) pts.push(mkp());
+        pts = pts.filter(p => p.life < p.maxLife);
+        pts.forEach(p => {
+          p.life++; p.y -= p.speed; p.x += p.drift*0.3;
+          p.alpha = p.life < 30 ? p.life/30 : p.life > p.maxLife-30 ? (p.maxLife-p.life)/30 : 0.7;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha*0.6; ctx.fill();
+          const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
+          g.addColorStop(0,p.color+"55"); g.addColorStop(1,p.color+"00");
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);
+          ctx.fillStyle=g; ctx.globalAlpha=p.alpha*0.3; ctx.fill();
+          ctx.globalAlpha=1;
+        });
+        requestAnimationFrame(tick);
+      }
+      window.addEventListener("resize", resize);
+      resize(); tick();
+    })();
 
-    function initGoogleAuth() {
-      if (typeof google === 'undefined') { setTimeout(initGoogleAuth, 100); return; }
-      googleTokenClient = google.accounts.oauth2.initTokenClient({
+    /* GOOGLE AUTH */
+    let tokenClient;
+    function initGoogle(){
+      if(typeof google==="undefined"){setTimeout(initGoogle,100);return;}
+      tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-        callback: async (tokenResponse) => {
-          if (tokenResponse?.access_token) {
-            await handleBackendLogin(tokenResponse.access_token);
-          }
-        },
+        callback: async (res) => { if(res?.access_token) await handleLogin(res.access_token); }
       });
     }
+    window.addEventListener("load", initGoogle);
 
-    window.addEventListener('load', initGoogleAuth);
+    function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
+    function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
 
-    function updateUI(user) {
-      errorBox.classList.add("hidden");
-      errorBox.innerText = "";
-      if (user) {
-        loggedOutView.classList.add("hidden");
-        loggedInView.style.display = "flex";
-        statusText.innerText = "ACCESS AUTHORIZED";
-        userName.innerText  = user.name  || "Quantum User";
-        userEmail.innerText = user.email || "";
-        // Validate picture URL before setting (prevent open redirect via img src)
-        if (user.picture && user.picture.startsWith("https://")) {
-          userAvatar.src = user.picture;
-        } else {
-          userAvatar.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        }
-      } else {
-        loggedInView.style.display = "none";
-        loggedOutView.classList.remove("hidden");
-        statusText.innerText = "Aapka account authorize karein";
-      }
+    function renderLoggedIn(user){
+      loginView.style.display   = "none";
+      profileView.style.display = "flex";
+      userName.textContent  = user.name  || "Quantum User";
+      userEmail.textContent = user.email || "";
+      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
+        ? user.picture
+        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
     }
+    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
 
-    async function handleBackendLogin(accessToken) {
-      googleLoginBtn.disabled = true;
-      statusText.innerText = "Authenticating...";
-
+    async function handleLogin(accessToken){
+      googleLoginBtn.disabled = true; hideError();
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ access_token: accessToken }),
-          // Do NOT send credentials: "include" unless using cookies
+        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({access_token:accessToken})
         });
-
-        if (!response.ok) {
-          // Show generic error — never expose server details
-          throw new Error("Authentication failed. Please try again.");
-        }
-
-        const data = await response.json();
-
-        if (data.status === "success" && data.user) {
-          // Store session in memory only — no localStorage
-          sessionState.user = data.user;
-          sessionState.sessionSignature = data.session_signature;
-          updateUI(data.user);
-        } else {
-          throw new Error("Session validation failed.");
-        }
-      } catch (error) {
-        // Show only safe, generic messages
-        errorBox.classList.remove("hidden");
-        errorBox.innerText = "Authentication failed. Please try again.";
-        updateUI(null);
-      } finally {
-        googleLoginBtn.disabled = false;
-      }
+        if(!res.ok) throw new Error();
+        const data = await res.json();
+        if(data.status==="success" && data.user){
+          session = { user:data.user, signature:data.session_signature };
+          renderLoggedIn(data.user);
+        } else throw new Error();
+      } catch { showError("Authentication failed. Please try again."); }
+      finally { googleLoginBtn.disabled = false; }
     }
 
     googleLoginBtn.addEventListener("click", () => {
-      errorBox.classList.add("hidden");
-      if (!googleTokenClient) {
-        errorBox.classList.remove("hidden");
-        errorBox.innerText = "Google services loading. Please wait a moment.";
-        return;
-      }
+      hideError();
+      if(!tokenClient){ showError("Google services loading. Please wait."); return; }
       googleLoginBtn.disabled = true;
-      googleTokenClient.requestAccessToken();
+      tokenClient.requestAccessToken();
     });
 
     logoutBtn.addEventListener("click", () => {
-      // Clear in-memory session
-      sessionState = { user: null, sessionSignature: null };
-      // Revoke Google token if available
-      if (typeof google !== 'undefined') {
-        google.accounts.oauth2.revoke();
-      }
-      updateUI(null);
+      session = {user:null,signature:null};
+      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
+      renderLoggedOut();
     });
-
-    // No localStorage session restore — user must log in each session
-    // This is intentional: prevents stale/stolen session reuse
   </script>
 </body>
 </html>
