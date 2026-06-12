@@ -295,20 +295,18 @@
   </div>
 
   <script>
-    const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
+    const API_BASE_URL     = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
+    const SESSION_KEY      = "qa_session";
 
     let session = { user: null, signature: null };
 
     const loginView      = document.getElementById("loginView");
     const profileView    = document.getElementById("profileView");
     const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const logoutBtn      = document.getElementById("logoutBtn");
     const errorMsg       = document.getElementById("errorMsg");
-    const userAvatar     = document.getElementById("userAvatar");
-    const userName       = document.getElementById("userName");
-    const userEmail      = document.getElementById("userEmail");
 
+    // ── Particle canvas ──────────────────────────────────────────────
     (function(){
       const canvas = document.getElementById("particleCanvas");
       const ctx    = canvas.getContext("2d");
@@ -342,9 +340,74 @@
       resize(); tick();
     })();
 
+    // ── Device Fingerprint ───────────────────────────────────────────
+    function getDeviceFingerprint() {
+      const canvas = document.createElement("canvas");
+      const ctx    = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(125, 1, 62, 20);
+      ctx.fillStyle = "#069";
+      ctx.fillText("QA-fingerprint", 2, 15);
+      ctx.fillStyle = "rgba(102,204,0,0.7)";
+      ctx.fillText("QA-fingerprint", 4, 17);
+      const canvasStr = canvas.toDataURL();
+
+      const raw = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + "x" + screen.height,
+        screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || "",
+        navigator.platform || "",
+        canvasStr.slice(-50)
+      ].join("|");
+
+      // Simple hash
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) {
+        hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+        hash |= 0;
+      }
+      return "dfp_" + Math.abs(hash).toString(16);
+    }
+
+    // ── Saved session check (auto-login) ────────────────────────────
+    function checkSavedSession() {
+      try {
+        const saved = localStorage.getItem(SESSION_KEY);
+        if (!saved) return false;
+        const s = JSON.parse(saved);
+        const currentDfp = getDeviceFingerprint();
+        if (s.email && s.deviceId && s.deviceId === currentDfp) {
+          // Same device & email → auto redirect
+          window.location.replace("Payment.html");
+          return true;
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    // ── Save session to localStorage ────────────────────────────────
+    function saveSession(user, deviceId) {
+      try {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({
+          email:    user.email,
+          uid:      user.uid,
+          deviceId: deviceId,
+          savedAt:  Date.now()
+        }));
+      } catch(e) {}
+    }
+
+    // ── Google init ──────────────────────────────────────────────────
     let tokenClient;
     function initGoogle(){
       if(typeof google==="undefined"){setTimeout(initGoogle,100);return;}
+      // Check saved session AFTER google loads (so page is ready)
+      if(checkSavedSession()) return;
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
@@ -356,45 +419,43 @@
     function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
     function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
 
-    function renderLoggedIn(user){
-      loginView.style.display   = "none";
-      profileView.style.display = "flex";
-      userName.textContent  = user.name  || "Quantum User";
-      userEmail.textContent = user.email || "";
-      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
-        ? user.picture
-        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-    }
-    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
-
+    // ── Main login handler ───────────────────────────────────────────
     async function handleLogin(accessToken){
-      googleLoginBtn.disabled = true; hideError();
+      googleLoginBtn.disabled = true;
+      googleLoginBtn.querySelector(".btn-label").textContent = "Verifying...";
+      hideError();
+
+      const deviceId = getDeviceFingerprint();
+
       try {
-        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
-          method:"POST", headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({access_token:accessToken})
+        const res = await fetch(`${API_BASE_URL}/api/auth`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken, device_id: deviceId })
         });
-        if(!res.ok) throw new Error();
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        if(data.status==="success" && data.user){
-          session = { user:data.user, signature:data.session_signature };
-          renderLoggedIn(data.user);
-        } else throw new Error();
-      } catch { showError("Authentication failed. Please try again."); }
-      finally { googleLoginBtn.disabled = false; }
+
+        if (data.status === "success" && data.user) {
+          session = { user: data.user, signature: data.session_signature };
+          saveSession(data.user, deviceId);
+          // Redirect to Payment page — no profile view shown
+          window.location.replace("Payment.html");
+        } else {
+          throw new Error();
+        }
+      } catch {
+        showError("Authentication failed. Please try again.");
+        googleLoginBtn.disabled = false;
+        googleLoginBtn.querySelector(".btn-label").textContent = "✦ Get Started ✦";
+      }
     }
 
     googleLoginBtn.addEventListener("click", () => {
       hideError();
-      if(!tokenClient){ showError("Google services loading. Please wait."); return; }
+      if (!tokenClient) { showError("Google services loading. Please wait."); return; }
       googleLoginBtn.disabled = true;
       tokenClient.requestAccessToken();
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      session = {user:null,signature:null};
-      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
-      renderLoggedOut();
     });
   </script>
 </body>
