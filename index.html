@@ -223,7 +223,7 @@
     // ════════════════════════════════════════════════════════
     const API_BASE_URL     = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
-    const SESSION_KEY      = "_qas";          // obfuscated key naam
+    const SESSION_KEY      = "_qas";
     const SESSION_TTL_MS   = 30 * 24 * 60 * 60 * 1000;  // 30 din
 
     // ════════════════════════════════════════════════════════
@@ -416,77 +416,73 @@
     }
 
     // ════════════════════════════════════════════════════════
-    //  GOOGLE TOKEN CLIENT — FIX: pehli baar fail hone ka bug
-    //
-    //  Root cause: tokenClient.requestAccessToken() first call pe
-    //  Google popup silently cancel ho jaata tha kyunki client
-    //  init nahi hua hota tha (race condition with async script).
-    //
-    //  Fix: google script onload ke baad hi init karo + button
-    //  tab tak disabled rakho + prompt: "select_account" force karo
-    //  taaki Google har baar fresh consent popup dikhaye.
+    //  GOOGLE TOKEN CLIENT
     // ════════════════════════════════════════════════════════
-    let tokenClient      = null;
-    let googleReady      = false;
-    let pendingLogin     = false;   // button click pending tha toh wait karo
+    let tokenClient  = null;
+    let googleReady  = false;
+    let pendingLogin = false;
 
     function initGoogleClient() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope:     "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-        prompt:    "select_account",   // ← force account picker, no silent fail
-        callback:  async (res) => {
-          if (res && res.access_token) {
-            await handleLogin(res.access_token);
-          } else {
-            // User ne cancel kiya
+      try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id:      GOOGLE_CLIENT_ID,
+          scope:          "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+          prompt:         "select_account",
+          callback:       async (res) => {
+            if (res && res.access_token) {
+              await handleLogin(res.access_token);
+            } else {
+              setBtnState(false);
+              showError("Login cancelled. Dobara try karo.");
+            }
+          },
+          error_callback: (err) => {
             setBtnState(false);
-            showError("Login cancelled. Please try again.");
+            showError("Google error: " + (err.type || "unknown") + ". Dobara try karo.");
           }
-        },
-        error_callback: (err) => {
-          setBtnState(false);
-          showError("Google login failed. Please try again.");
+        });
+        googleReady = true;
+        if (pendingLogin) {
+          pendingLogin = false;
+          tokenClient.requestAccessToken();
         }
-      });
-      googleReady = true;
-
-      // Agar user ne button pehle click kar diya tha tab Google ready nahi tha
-      if (pendingLogin) {
-        pendingLogin = false;
-        tokenClient.requestAccessToken();
+      } catch(e) {
+        showError("Google load nahi hua. Page refresh karo.");
+        setBtnState(false);
       }
     }
 
-    // Google GSI script load hone ke baad yeh call hoga
+    // ── Google ready hone ke baad yeh fire hoga ──────────────
     window.onGoogleLibraryLoad = function() {
-      // Pehle auto-login check karo
-      if (checkAutoLogin()) return;   // redirecting...
-      // Nahi hua to Google client init karo aur login button dikhao
+      if (checkAutoLogin()) return;
       initGoogleClient();
       showLoginView();
     };
 
-    // Fallback: agar onGoogleLibraryLoad fire nahi hua (kuch browsers)
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        if (!googleReady) {
-          if (typeof google !== "undefined" && google.accounts) {
-            if (checkAutoLogin()) return;
-            initGoogleClient();
-          }
-          showLoginView();
-        }
-      }, 2500);
-    });
+    // ── Fallback polling — kuch browsers mein onGoogleLibraryLoad nahi chalta
+    let _pollCount = 0;
+    const _poll = setInterval(() => {
+      _pollCount++;
+      if (googleReady) { clearInterval(_poll); return; }
+      if (typeof google !== "undefined" && google.accounts && google.accounts.oauth2) {
+        clearInterval(_poll);
+        if (checkAutoLogin()) return;
+        initGoogleClient();
+        showLoginView();
+      }
+      if (_pollCount > 40) {   // 8 second baad bhi nahi aaya
+        clearInterval(_poll);
+        showLoginView();
+        showError("Google load nahi hua. Internet check karo ya page refresh karo.");
+      }
+    }, 200);
 
     // ════════════════════════════════════════════════════════
-    //  MAIN LOGIN HANDLER
+    //  MAIN LOGIN HANDLER — detailed error messages
     // ════════════════════════════════════════════════════════
     async function handleLogin(accessToken) {
       setBtnState(true);
       hideError();
-
       const deviceId = getDeviceFingerprint();
 
       try {
@@ -496,17 +492,37 @@
           body:    JSON.stringify({ access_token: accessToken, device_id: deviceId })
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        // Response text pehle lo — chahe JSON ho ya na ho
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = null; }
 
-        if (data.status === "success" && data.user) {
+        if (res.status === 429) {
+          showError("Bahut zyada requests. 1 minute baad try karo.");
+          setBtnState(false); return;
+        }
+        if (res.status === 503 || res.status === 504) {
+          showError("Server temporarily down. 30 sec baad try karo.");
+          setBtnState(false); return;
+        }
+        if (!res.ok) {
+          showError("Server error (" + res.status + "). Dobara try karo.");
+          setBtnState(false); return;
+        }
+        if (data && data.status === "success" && data.user) {
           saveSession(data.user, deviceId);
           window.location.replace("Payment.html");
         } else {
-          throw new Error("Bad response");
+          showError("Login fail hua. Dobara try karo.");
+          setBtnState(false);
         }
       } catch(err) {
-        showError("Authentication failed. Please try again.");
+        // Network error — no internet or CORS
+        if (!navigator.onLine) {
+          showError("Internet nahi hai. Connection check karo.");
+        } else {
+          showError("Network error. Page refresh karke dobara try karo.");
+        }
         setBtnState(false);
       }
     }
@@ -517,7 +533,6 @@
     googleLoginBtn.addEventListener("click", () => {
       hideError();
       if (!googleReady || !tokenClient) {
-        // Google abhi load ho raha hai — click save karo
         pendingLogin = true;
         setBtnState(true);
         googleLoginBtn.querySelector(".btn-label").textContent = "Loading...";
