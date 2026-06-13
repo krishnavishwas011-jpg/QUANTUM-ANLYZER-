@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ... (Baki ka code same rahega) ... -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plan Slider</title>
-    <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -15,29 +15,83 @@
         .plan-title { font-size: 26px; font-weight: 900; color: #8B5CF6; margin-bottom: 10px; }
         .plan-desc { font-size: 13px; color: #6b7280; text-align: center; margin-bottom: 20px; line-height: 1.4; }
 
-        /* Slider Styles */
         .swiper { width: 100%; padding: 20px 0; }
         .card { background: #f3f4f6; border-radius: 25px; padding: 15px 20px; width: 100%; border: 2px solid #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .price-main { font-weight: 900; font-size: 18px; color: #8B5CF6; }
         .discount-text { font-size: 10px; font-weight: 800; color: #333; }
         .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .feature-item { display: flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 1000; color: #4b5563; }
-        .feature-item img { width: 25px; height: 25px; animation: pulse 1.5s ease-in-out infinite; }
-        .full-width { grid-column: span 2; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .feature-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 1000; color: #4b5563; }
+        .feature-item img { width: 25px; height: 25px; }
         
         .btn { background: linear-gradient(135deg, #7C3AED 0%, #5B6AF0 100%); color: #ffffff; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; width: 100%; box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4); }
+
+        /* Welcome Card - Top Left */
+        .welcome-card {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 50px;
+            padding: 7px 16px 7px 7px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            z-index: 999;
+            animation: slideIn 0.5s ease-out both;
+            max-width: calc(100vw - 32px);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .welcome-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #8B5CF6;
+            flex-shrink: 0;
+        }
+        .welcome-text { display: flex; flex-direction: column; overflow: hidden; }
+        .welcome-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #8B5CF6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        .welcome-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #1E293B;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
     </style>
 </head>
 <body>
+
+<!-- Welcome Card - Top Left -->
+<div class="welcome-card" id="welcomeCard" style="display:none;">
+    <img class="welcome-avatar" id="wcAvatar" src="" alt="avatar"/>
+    <div class="welcome-text">
+        <span class="welcome-label">Welcome,</span>
+        <span class="welcome-name" id="wcName">User</span>
+    </div>
+</div>
 
 <div class="content-box">
     <img src="https://i.ibb.co/Cp6rPPxp/20260218-115056.png" class="logo">
     <p class="plan-title">Select Your Plan</p>
     <p class="plan-desc">Subscribe today and unlock powerful tools, real-time insights, and premium support to help you trade smarter every day.</p>
     
-    <!-- Slider -->
     <div class="swiper">
         <div class="swiper-wrapper" id="slider-content"></div>
     </div>
@@ -79,7 +133,42 @@
         `;
     });
 
-    new Swiper('.swiper', { loop: true, centeredSlides: true, slidesPerView: 1.1, spaceBetween: 10 });
+    // Swiper initialization with Auto-Scroll animation
+    const swiper = new Swiper('.swiper', {
+        loop: true,
+        centeredSlides: true,
+        slidesPerView: 1.1,
+        spaceBetween: 10,
+        autoplay: {
+            delay: 500,        // Itni der ruka rahega
+            disableOnInteraction: false,
+        },
+        speed: 1000,          // Scroll hone ki speed (miliseconds)
+    });
+
+    // Ye code sirf ek baar scroll karke rok dega
+    setTimeout(() => {
+        swiper.autoplay.stop();
+    }, 2000); // 2 second baad autoplay ruk jayega
+</script>
+<script>
+    // SessionStorage se user data load karo
+    (function(){
+        try {
+            const userData = sessionStorage.getItem("qUser");
+            if(!userData) return;
+            const user = JSON.parse(userData);
+            const card   = document.getElementById("welcomeCard");
+            const avatar = document.getElementById("wcAvatar");
+            const name   = document.getElementById("wcName");
+            if(user.name) name.textContent = user.name.toUpperCase();
+            avatar.src = (user.picture && user.picture.startsWith("https://"))
+                ? user.picture
+                : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            avatar.onerror = () => { avatar.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; };
+            card.style.display = "flex";
+        } catch(e) { console.log("User data load error:", e); }
+    })();
 </script>
 </body>
 </html>
