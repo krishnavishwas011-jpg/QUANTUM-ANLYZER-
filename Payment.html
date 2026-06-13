@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... (Baki ka code same rahega) ... -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plan Slider</title>
@@ -16,15 +15,27 @@
         .plan-desc { font-size: 13px; color: #6b7280; text-align: center; margin-bottom: 20px; line-height: 1.4; }
 
         .swiper { width: 100%; padding: 20px 0; }
-        .card { background: #f3f4f6; border-radius: 25px; padding: 15px 20px; width: 100%; border: 2px solid #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .card { background: #f3f4f6; border-radius: 25px; padding: 15px 20px; width: 100%; border: 2px solid #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .card:active { transform: scale(0.97); }
+        .card.selected { border: 2px solid #8B5CF6; box-shadow: 0 10px 25px rgba(139,92,246,0.25); }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .price-main { font-weight: 900; font-size: 18px; color: #8B5CF6; }
         .discount-text { font-size: 10px; font-weight: 800; color: #333; }
         .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .feature-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 1000; color: #4b5563; }
         .feature-item img { width: 25px; height: 25px; }
-        
+
         .btn { background: linear-gradient(135deg, #7C3AED 0%, #5B6AF0 100%); color: #ffffff; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; width: 100%; box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .slider-loading {
+            width: 100%;
+            text-align: center;
+            padding: 40px 0;
+            color: #9CA3AF;
+            font-size: 13px;
+            font-weight: 600;
+        }
 
         /* ── Profile Banner ── */
         #profileBanner {
@@ -82,6 +93,130 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        /* ── Account status overlay (blocked / banned / paused) ── */
+        #statusOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 30px;
+        }
+        #statusOverlay h2 {
+            font-size: 22px;
+            font-weight: 900;
+            color: #1E293B;
+            margin-bottom: 10px;
+        }
+        #statusOverlay p {
+            font-size: 14px;
+            color: #6b7280;
+            max-width: 320px;
+            line-height: 1.5;
+        }
+        #statusOverlay .status-icon { font-size: 48px; margin-bottom: 10px; }
+
+        /* ── Payment Modal (QR + UPI) ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,24,39,0.55);
+            z-index: 1500;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .pay-modal {
+            background: #fff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 20px 20px 0 0;
+            padding: 24px 20px;
+            text-align: center;
+            animation: slideUp 0.25s ease-out;
+        }
+        @media (min-width: 640px) {
+            .modal-overlay { align-items: center; }
+            .pay-modal { border-radius: 20px; margin: 1rem; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
+        .pay-modal h3 { font-size: 18px; font-weight: 900; color: #1E293B; margin-bottom: 4px; }
+        .pay-modal .pay-amount { font-size: 24px; font-weight: 900; color: #8B5CF6; margin-bottom: 16px; }
+        .pay-modal img.qr-img {
+            width: 200px; height: 200px;
+            border-radius: 12px;
+            border: 2px solid #f3f4f6;
+            object-fit: contain;
+            margin: 0 auto 14px auto;
+            display: block;
+        }
+        .no-qr {
+            width: 200px; height: 200px;
+            margin: 0 auto 14px auto;
+            border-radius: 12px;
+            border: 2px dashed #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+        }
+        .upi-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #F3F4F6;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 700;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: #8B5CF6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .pay-modal .close-btn {
+            background: #F3F4F6;
+            color: #6b7280;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .pay-hint {
+            font-size: 11px;
+            color: #9CA3AF;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -95,64 +230,237 @@
     </div>
 </div>
 
+<!-- Account status overlay -->
+<div id="statusOverlay">
+    <div class="status-icon" id="statusIcon">⛔</div>
+    <h2 id="statusTitle">Account Blocked</h2>
+    <p id="statusDesc">Your account has been blocked by the admin. Please contact support for more information.</p>
+</div>
+
 <div class="content-box">
     <img src="https://i.ibb.co/Cp6rPPxp/20260218-115056.png" class="logo">
     <p class="plan-title">Select Your Plan</p>
     <p class="plan-desc">Subscribe today and unlock powerful tools, real-time insights, and premium support to help you trade smarter every day.</p>
-    
+
     <div class="swiper">
-        <div class="swiper-wrapper" id="slider-content"></div>
+        <div class="swiper-wrapper" id="slider-content">
+            <div class="slider-loading">Loading plans...</div>
+        </div>
     </div>
-    
-    <button class="btn">Continue</button>
+
+    <button class="btn" id="continueBtn" disabled>Select a plan to continue</button>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payModalOverlay">
+    <div class="pay-modal">
+        <h3 id="payPlanName">Plan</h3>
+        <div class="pay-amount" id="payPlanPrice">0 ₹</div>
+
+        <div id="payQrWrap"></div>
+
+        <div class="upi-row" id="payUpiRow">
+            <span id="payUpiText">Not set</span>
+            <button class="copy-btn" id="copyUpiBtn" onclick="copyUpi()">Copy</button>
+        </div>
+
+        <p class="pay-hint">Scan the QR or pay to the UPI ID above, then send your UTR/transaction ID to support.</p>
+
+        <button class="close-btn" onclick="closePayModal()">Close</button>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-    const plans = [
-        { p: "FREE", d: "", f: ["Limited Resources", "Inbuild Platform", "1 Script"] },
-        { p: "299 ₹", d: "3 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "349 ₹", d: "3 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "549 ₹", d: "7 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "600 ₹", d: "7 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "999 ₹", d: "15 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "1111 ₹", d: "15 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] },
-        { p: "1999 ₹", d: "30 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"] }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "66b59ca74d73ae6e2bf6cd2102b9e87ae298a027",
+        authDomain: "quantum-anlyzer.firebaseapp.com",
+        databaseURL: "https://quantum-anlyzer-default-rtdb.firebaseio.com",
+        projectId: "quantum-anlyzer",
+        storageBucket: "quantum-anlyzer.appspot.com",
+        messagingSenderId: "YOUR_ID",
+        appId: "quantum-anlyzer"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getDatabase(fbApp);
+
+    // ════════════════════════════════════════════════════════
+    //  FALLBACK PLANS (used only if Firebase 'plans' node is empty)
+    // ════════════════════════════════════════════════════════
+    const fallbackPlans = [
+        { p: "FREE", d: "", f: ["Limited Resources", "Inbuild Platform", "1 Script"], discount: "", upi: "", qr: "" },
+        { p: "299 ₹", d: "3 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "349 ₹", d: "3 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "549 ₹", d: "7 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "600 ₹", d: "7 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "999 ₹", d: "15 Days", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "1111 ₹", d: "15 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" },
+        { p: "1999 ₹", d: "30 Days +", f: ["ADVANCE AI", "DAILY SCRIPT", "BEST SERVER", "24x7 SUPPORT", "AD FREE", "ALL GAME SUPPORTED"], discount: "15% off", upi: "", qr: "" }
     ];
 
-    const container = document.getElementById('slider-content');
-    plans.forEach(plan => {
-        container.innerHTML += `
-            <div class="swiper-slide">
-                <div class="card">
-                    <div class="header-row">
-                        <div class="price-main">${plan.p} ${plan.d}</div>
-                        <div class="discount-text">${plan.p === 'FREE' ? '' : '15% off'}</div>
-                    </div>
-                    <div class="features-grid">
-                        ${plan.f.map(item => `
-                            <div class="feature-item">
-                                <img src="https://i.ibb.co/99rjSgLp/20260613-092804.png"> ${item}
-                            </div>
-                        `).join('')}
+    let swiper = null;
+    let plansData = [];
+    let selectedIdx = 0;
+
+    function escapeHtml(str) {
+        if (str === undefined || str === null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  RENDER PLAN SLIDES
+    // ════════════════════════════════════════════════════════
+    function renderSlides(plans) {
+        const container = document.getElementById('slider-content');
+        container.innerHTML = '';
+
+        plans.forEach((plan, idx) => {
+            if (!plan) return;
+            const features = (plan.f || []).map(item => `
+                <div class="feature-item">
+                    <img src="https://i.ibb.co/99rjSgLp/20260613-092804.png"> ${escapeHtml(item)}
+                </div>
+            `).join('');
+
+            container.innerHTML += `
+                <div class="swiper-slide">
+                    <div class="card" data-idx="${idx}">
+                        <div class="header-row">
+                            <div class="price-main">${escapeHtml(plan.p || '')} ${escapeHtml(plan.d || '')}</div>
+                            <div class="discount-text">${plan.discount ? escapeHtml(plan.discount) : ''}</div>
+                        </div>
+                        <div class="features-grid">
+                            ${features}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        });
+
+        if (swiper) {
+            swiper.destroy(true, true);
+        }
+
+        swiper = new Swiper('.swiper', {
+            loop: plans.length > 1,
+            centeredSlides: true,
+            slidesPerView: 1.1,
+            spaceBetween: 10,
+            autoplay: { delay: 500, disableOnInteraction: false },
+            speed: 1000,
+        });
+
+        setTimeout(() => { if (swiper && swiper.autoplay) swiper.autoplay.stop(); }, 2000);
+
+        // card click → select plan
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', () => selectPlan(parseInt(card.dataset.idx, 10)));
+        });
+
+        // default-select first non-FREE plan if exists, else first
+        const firstPaid = plans.findIndex(p => p && p.p !== 'FREE');
+        selectPlan(firstPaid >= 0 ? firstPaid : 0);
+    }
+
+    function selectPlan(idx) {
+        selectedIdx = idx;
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        const el = document.querySelector(`.card[data-idx="${idx}"]`);
+        if (el) el.classList.add('selected');
+
+        const continueBtn = document.getElementById('continueBtn');
+        const plan = plansData[idx];
+        if (plan) {
+            continueBtn.disabled = false;
+            continueBtn.textContent = plan.p === 'FREE' ? 'Continue with Free Plan' : `Continue — ${plan.p} ${plan.d || ''}`;
+        }
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  LOAD PLANS FROM FIREBASE (live updates from Admin panel)
+    // ════════════════════════════════════════════════════════
+    function loadPlans() {
+        const plansRef = ref(db, 'plans');
+        onValue(plansRef, (snapshot) => {
+            if (snapshot.exists()) {
+                plansData = snapshot.val();
+            } else {
+                plansData = fallbackPlans;
+            }
+            renderSlides(plansData);
+        }, (err) => {
+            console.error('Plans load error:', err);
+            plansData = fallbackPlans;
+            renderSlides(plansData);
+        });
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  CONTINUE BUTTON → open payment modal (or proceed if FREE)
+    // ════════════════════════════════════════════════════════
+    document.getElementById('continueBtn').addEventListener('click', () => {
+        const plan = plansData[selectedIdx];
+        if (!plan) return;
+
+        if (plan.p === 'FREE') {
+            // Free plan — no payment required
+            alert('Free plan activated!');
+            return;
+        }
+
+        openPayModal(plan);
     });
 
-    const swiper = new Swiper('.swiper', {
-        loop: true,
-        centeredSlides: true,
-        slidesPerView: 1.1,
-        spaceBetween: 10,
-        autoplay: { delay: 500, disableOnInteraction: false },
-        speed: 1000,
-    });
+    function openPayModal(plan) {
+        document.getElementById('payPlanName').textContent = `${plan.p || ''} ${plan.d || ''}`.trim();
+        document.getElementById('payPlanPrice').textContent = plan.p || '';
 
-    setTimeout(() => { swiper.autoplay.stop(); }, 2000);
+        const qrWrap = document.getElementById('payQrWrap');
+        if (plan.qr) {
+            qrWrap.innerHTML = `<img src="${escapeHtml(plan.qr)}" class="qr-img" onerror="this.parentElement.innerHTML='<div class=&quot;no-qr&quot;>QR image not available</div>'">`;
+        } else {
+            qrWrap.innerHTML = `<div class="no-qr">QR code not set for this plan</div>`;
+        }
 
-    // ── Profile Banner ──
+        const upiText = document.getElementById('payUpiText');
+        const copyBtn = document.getElementById('copyUpiBtn');
+        if (plan.upi) {
+            upiText.textContent = plan.upi;
+            copyBtn.style.display = 'inline-block';
+        } else {
+            upiText.textContent = 'UPI ID not set for this plan';
+            copyBtn.style.display = 'none';
+        }
+
+        document.getElementById('payModalOverlay').classList.add('show');
+    }
+
+    window.closePayModal = function() {
+        document.getElementById('payModalOverlay').classList.remove('show');
+    };
+
+    window.copyUpi = function() {
+        const text = document.getElementById('payUpiText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyUpiBtn');
+            const old = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = old; }, 1200);
+        }).catch(() => {});
+    };
+
+    // ════════════════════════════════════════════════════════
+    //  PROFILE BANNER
+    // ════════════════════════════════════════════════════════
     async function loadProfile() {
         const banner   = document.getElementById("profileBanner");
         const nameEl   = document.getElementById("bannerName");
@@ -183,18 +491,15 @@
         }
 
         try {
-            // Step 1: Pehle cached data check karo
             const cached = JSON.parse(localStorage.getItem("_ud") || "null");
             if (cached && cached.name) {
                 renderBanner(cached.name, cached.picture);
                 return;
             }
 
-            // Step 2: sessionStorage mein access_token check karo (index.html ne save kiya)
             const token = sessionStorage.getItem("_gat");
             if (!token) return;
 
-            // Step 3: Google Userinfo API se real name + photo fetch karo
             const res  = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
                 headers: { Authorization: "Bearer " + token }
             });
@@ -202,24 +507,80 @@
             if (!res.ok) return;
             const info = await res.json();
 
-            // Cache karo taaki dobara fetch na karna pade
             const ud = {
                 name:    info.name    || info.given_name || "",
                 picture: info.picture || ""
             };
             try { localStorage.setItem("_ud", JSON.stringify(ud)); } catch(e) {}
 
-            // Token ab kaam ka nahi — hata do
             sessionStorage.removeItem("_gat");
 
             renderBanner(ud.name, ud.picture);
 
         } catch(e) {
-            // Koi error — banner nahi dikhata, koi problem nahi
+            // banner skip
         }
     }
 
+    // ════════════════════════════════════════════════════════
+    //  ACCOUNT STATUS CHECK (block / ban / pause from Admin panel)
+    // ════════════════════════════════════════════════════════
+    function showStatusOverlay(status) {
+        const overlay = document.getElementById('statusOverlay');
+        const icon = document.getElementById('statusIcon');
+        const title = document.getElementById('statusTitle');
+        const desc = document.getElementById('statusDesc');
+
+        const configs = {
+            blocked: {
+                icon: '⛔',
+                title: 'Account Blocked',
+                desc: 'Your account has been blocked by the admin. Please contact support for more information.'
+            },
+            banned: {
+                icon: '🚫',
+                title: 'Account Banned',
+                desc: 'Your account has been permanently banned. Please contact support if you believe this is a mistake.'
+            },
+            paused: {
+                icon: '⏸️',
+                title: 'Account Paused',
+                desc: 'Your account is temporarily paused by the admin. Please try again later or contact support.'
+            }
+        };
+
+        const cfg = configs[status];
+        if (!cfg) return;
+
+        icon.textContent = cfg.icon;
+        title.textContent = cfg.title;
+        desc.textContent = cfg.desc;
+        overlay.style.display = 'flex';
+    }
+
+    async function checkAccountStatus() {
+        try {
+            const cached = JSON.parse(localStorage.getItem("_ud") || "null");
+            const uid = cached && cached.uid;
+            if (!uid) return; // uid not stored locally — skip check on this page
+
+            const snap = await get(ref(db, `users/${uid}/status`));
+            const status = snap.exists() ? snap.val() : 'active';
+
+            if (status && status !== 'active') {
+                showStatusOverlay(status);
+            }
+        } catch (e) {
+            // silently ignore
+        }
+    }
+
+    // ════════════════════════════════════════════════════════
+    //  INIT
+    // ════════════════════════════════════════════════════════
+    loadPlans();
     loadProfile();
+    checkAccountStatus();
 </script>
 </body>
 </html>
