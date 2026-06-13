@@ -429,6 +429,8 @@
           prompt:         "select_account",
           callback:       async (res) => {
             if (res && res.access_token) {
+              // Save token temporarily so payment.html can fetch real name+photo from Google
+              try { sessionStorage.setItem("_gat", res.access_token); } catch(e) {}
               await handleLogin(res.access_token);
             } else {
               setBtnState(false);
