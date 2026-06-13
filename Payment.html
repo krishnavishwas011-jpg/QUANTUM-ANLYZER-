@@ -237,6 +237,59 @@
             margin-top: 4px;
             line-height: 1.4;
         }
+
+        /* ── UTR Input ── */
+        .utr-box {
+            margin-top: 16px;
+            text-align: left;
+        }
+        .utr-box label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+        .utr-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid #E5E7EB;
+            background: #F9FAFB;
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+            font-family: monospace;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .utr-box input:focus {
+            border-color: #8B5CF6;
+            background: #fff;
+        }
+        .utr-submit-btn {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B6AF0 100%);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+        }
+        .utr-submit-btn:active { transform: scale(0.98); }
+        .utr-status-msg {
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+        .utr-status-msg.success { color: #059669; display: block; }
+        .utr-status-msg.error { color: #DC2626; display: block; }
     </style>
 </head>
 <body>
@@ -282,7 +335,14 @@
         <div class="upi-apps-row" id="payAppsRow"></div>
         <div class="no-upi-msg" id="payNoUpiMsg" style="display:none;">UPI ID not set for this plan</div>
 
-        <p class="pay-hint">Scan the QR or tap an app below to pay, then send your UTR/transaction ID to support.</p>
+        <p class="pay-hint">Scan the QR or tap an app below to pay, then enter your UTR/transaction ID below.</p>
+
+        <div class="utr-box">
+            <label>Enter UTR / Transaction ID</label>
+            <input type="text" id="utrInput" placeholder="e.g. 123456789012" autocomplete="off">
+            <button class="utr-submit-btn" id="utrSubmitBtn" onclick="submitUtr()">Submit UTR</button>
+            <div class="utr-status-msg" id="utrStatusMsg"></div>
+        </div>
 
         <button class="close-btn" onclick="closePayModal()">Close</button>
     </div>
@@ -291,7 +351,7 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "66b59ca74d73ae6e2bf6cd2102b9e87ae298a027",
@@ -438,7 +498,19 @@
         openPayModal(plan);
     });
 
+    let currentPayPlan = null;
+
     function openPayModal(plan) {
+        currentPayPlan = plan;
+
+        // reset UTR field/status each time modal opens
+        document.getElementById('utrInput').value = '';
+        const statusMsg = document.getElementById('utrStatusMsg');
+        statusMsg.className = 'utr-status-msg';
+        statusMsg.textContent = '';
+        document.getElementById('utrSubmitBtn').disabled = false;
+        document.getElementById('utrSubmitBtn').textContent = 'Submit UTR';
+
         document.getElementById('payPlanName').textContent = `${plan.p || ''} ${plan.d || ''}`.trim();
         document.getElementById('payPlanPrice').textContent = plan.p || '';
 
@@ -487,6 +559,63 @@
 
     window.closePayModal = function() {
         document.getElementById('payModalOverlay').classList.remove('show');
+    };
+
+    window.submitUtr = async function() {
+        const input = document.getElementById('utrInput');
+        const statusMsg = document.getElementById('utrStatusMsg');
+        const btn = document.getElementById('utrSubmitBtn');
+
+        const utr = input.value.trim();
+
+        statusMsg.className = 'utr-status-msg';
+        statusMsg.textContent = '';
+
+        if (!utr) {
+            statusMsg.className = 'utr-status-msg error';
+            statusMsg.textContent = 'Please enter your UTR / Transaction ID.';
+            return;
+        }
+        if (utr.length < 6) {
+            statusMsg.className = 'utr-status-msg error';
+            statusMsg.textContent = 'UTR looks too short. Please check and try again.';
+            return;
+        }
+        if (!currentPayPlan) {
+            statusMsg.className = 'utr-status-msg error';
+            statusMsg.textContent = 'Something went wrong. Please reopen and try again.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            const cached = JSON.parse(localStorage.getItem("_ud") || "null");
+            const uid = (cached && cached.uid) || 'unknown';
+            const userName = (cached && cached.name) || 'Unknown';
+
+            const paymentEntry = {
+                uid: uid,
+                name: userName,
+                plan: currentPayPlan.p || '',
+                duration: currentPayPlan.d || '',
+                utr: utr,
+                status: 'pending',
+                timestamp: { ".sv": "timestamp" }
+            };
+
+            await push(ref(db, 'payments'), paymentEntry);
+
+            statusMsg.className = 'utr-status-msg success';
+            statusMsg.textContent = 'UTR submitted! We will verify and activate your plan soon.';
+            btn.textContent = 'Submitted ✓';
+        } catch (e) {
+            statusMsg.className = 'utr-status-msg error';
+            statusMsg.textContent = 'Failed to submit. Please try again.';
+            btn.disabled = false;
+            btn.textContent = 'Submit UTR';
+        }
     };
 
     // ════════════════════════════════════════════════════════
