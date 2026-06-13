@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: flex-start; padding-top: 80px;
+            align-items: center; 
+            background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
+            background-attachment: fixed; font-family: sans-serif;
+        }
+
+        .glass-box { width: 190px; height: 200px; padding: 20px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; color: #444; }
+
+        .icons-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; }
+        .icons-container img { width: 70px; height: 70px; }
+        .last-icon { width: 100px !important; height: 100px !important; }
+
+        .input-box-only {
+            position: relative; width: 250px; height: 50px; margin-top: 30px;
+            padding: 0 20px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px);
+            border-radius: 90px; border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: flex; align-items: center;
+        }
+
+        /* Vibration Animation */
+        .vibrating { animation: stronger-vibrate 0.15s infinite; }
+        @keyframes stronger-vibrate { 
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-3px); }
+            40% { transform: translateX(3px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+            100% { transform: translateX(0); } 
+        }
+
+        .utr-stamp { position: absolute; left: 15px; font-size: 10px; font-weight: bold; color: #6976FF; background: rgba(255, 255, 255, 0.8); padding: 2px 5px; border-radius: 5px; border: 1px solid #6976FF; pointer-events: none; }
+        input { width: 100%; border: none; outline: none; background: transparent; font-size: 18px; text-align: center; color: #6976FF; padding-left: 30px; }
+
+        /* Circle Button Styling */
+        .home-btn {
+            margin-top: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; /* Circle shape */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: #6976FF;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-box"><h3>Box</h3><p>Yeh lamba aur patla box hai.</p></div>
+
+    <div class="icons-container">
+        <img src="https://i.ibb.co/F46SGwxp/20260613-135424.png" alt="icon1">
+        <img src="https://i.ibb.co/Q3NqLqzc/20260613-135445.png" alt="icon2">
+        <img src="https://i.ibb.co/bRzyS4S1/20260613-135511.png" alt="icon3">
+        <img src="https://i.ibb.co/DDB70BrJ/20260613-135550.png" alt="icon4" class="last-icon">
+    </div>
+
+    <div class="input-box-only" id="inputBox">
+        <span class="utr-stamp">UtR</span>
+        <input type="text" id="userInput" placeholder="Yahan UTR dalein...">
+    </div>
+
+    <!-- Home Circular Button -->
+    <a href="home.html" class="home-btn">➡️</a>
+
+    <script>
+        const input = document.getElementById('userInput');
+        const box = document.getElementById('inputBox');
+
+        const timer = setTimeout(() => {
+            if(input.value === "") {
+                box.classList.add('vibrating');
+            }
+        }, 10000);
+
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            box.classList.remove('vibrating');
+        });
+    </script>
+</body>
+</html>
