@@ -1,550 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 script-src 'self' https://accounts.google.com https://cdnjs.cloudflare.com 'unsafe-inline';
-                 style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
-                 font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-                 connect-src 'self' https://flask-hello-world-nu-sooty-63.vercel.app https://accounts.google.com https://www.googleapis.com;
-                 img-src 'self' https: data:;">
-  <title>Quantum Analyzer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Faster+One&family=Luckiest+Guy&family=Rubik+Marker+Hatch&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    <style>
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: flex-start; padding-top: 80px;
+            align-items: center; 
+            background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
+            background-attachment: fixed; font-family: sans-serif;
+        }
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(180deg, #c3caff 0%, #e2e5ff 40%, #ffffff 100%);
-      font-family: 'Space Grotesk', sans-serif;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 20px 10px;
-    }
+        .glass-box { width: 190px; height: 200px; padding: 20px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; color: #444; }
 
-    .app-container {
-      width: 100%;
-      max-width: 100vw;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      /* ✅ FIX: margin-bottom hataya — ab button normal flow mein hai */
-      margin-bottom: 20px;
-    }
+        .icons-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; }
+        .icons-container img { width: 70px; height: 70px; }
+        .last-icon { width: 100px !important; height: 100px !important; }
 
-    .preview-image {
-      width: 100vw;
-      max-width: 100vw;
-      height: auto;
-      max-height: 180vh;
-      object-fit: contain;
-      border-radius: 20px;
-      margin-top: 10px;
-      display: block;
-      transform: scale(1.15);
-      transform-origin: center top;
-    }
+        .input-box-only {
+            position: relative; width: 250px; height: 50px; margin-top: 30px;
+            padding: 0 20px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px);
+            border-radius: 90px; border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: flex; align-items: center;
+        }
 
-    .promo-text {
-      margin-top: 20px;
-      color: #1E293B;
-      font-family: 'Luckiest Guy', cursive;
-      font-size: 38px;
-      font-weight: 400;
-      letter-spacing: 2px;
-      padding: 0 20px;
-      line-height: 1.15;
-      text-transform: uppercase;
-    }
+        /* Vibration Animation */
+        .vibrating { animation: stronger-vibrate 0.15s infinite; }
+        @keyframes stronger-vibrate { 
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-3px); }
+            40% { transform: translateX(3px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+            100% { transform: translateX(0); } 
+        }
 
-    .action-cards-container {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      max-width: 500px;
-      margin: 25px auto 10px auto;
-      padding: 0 15px;
-    }
+        .utr-stamp { position: absolute; left: 15px; font-size: 10px; font-weight: bold; color: #6976FF; background: rgba(255, 255, 255, 0.8); padding: 2px 5px; border-radius: 5px; border: 1px solid #6976FF; pointer-events: none; }
+        input { width: 100%; border: none; outline: none; background: transparent; font-size: 18px; text-align: center; color: #6976FF; padding-left: 30px; }
 
-    .action-card {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 24px;
-      text-decoration: none;
-      text-align: left;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-      transition: transform 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .action-card:active { transform: scale(0.96); }
-    .card-join    { background: linear-gradient(135deg,#e6e9ff 0%,#f1f3ff 100%); border: 1.5px solid #cbd2f6; }
-    .card-support { background: linear-gradient(135deg,#f5f6f8 0%,#ffffff 100%); border: 1.5px solid #e2e8f0; }
-    .card-icon    { color:#000; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .card-content { display:flex; flex-direction:column; }
-    .card-title   { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#000; line-height:1.2; }
-    .card-subtitle{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:500; color:#64748B; margin-top:1px; white-space:nowrap; }
+        /* Circle Button Styling */
+        .home-btn {
+            margin-top: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; /* Circle shape */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: #6976FF;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
 
-    /* ✅ FIX: position:fixed hataya — ab normal flow mein hai */
-    #loginView {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      margin-top: 25px;
-      margin-bottom: 40px;
-      z-index: 100;
-    }
-
-    .sub-btn {
-      position: relative;
-      width: 300px;
-      height: 50px;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #7C5CFC 0%, #c4b5fd 100%);
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
-      box-shadow: 0 8px 30px rgba(124,92,252,0.45);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      animation: btnAppear 0.6s 0.3s both ease-out;
-    }
-    @keyframes btnAppear {
-      from { opacity:0; transform:translateY(20px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .sub-btn:active { transform:scale(0.96); box-shadow:0 4px 16px rgba(124,92,252,0.35); }
-    .sub-btn .btn-label {
-      color:#fff;
-      font-family:'Space Grotesk',sans-serif;
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:0.3px;
-      white-space:nowrap;
-    }
-
-    .error-msg { margin-top:14px; font-size:13px; color:#DC2626; text-align:center; font-weight:500; display:none; }
-
-    /* Loading overlay */
-    #loadingOverlay {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(180deg,#c3caff 0%,#e2e5ff 40%,#fff 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      transition: opacity 0.3s ease;
-    }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 4px solid rgba(124,92,252,0.2);
-      border-top-color: #7C5CFC;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform:rotate(360deg); } }
-
-    @media (max-width:400px) {
-      .card-title    { font-size:14px; }
-      .card-subtitle { font-size:10px; }
-      .action-card   { padding:10px 12px; }
-    }
-  </style>
+        .home-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Loading overlay -->
-  <div id="loadingOverlay"><div class="spinner"></div></div>
+    <div class="glass-box"><h3>Box</h3><p>Yeh lamba aur patla box hai.</p></div>
 
-  <canvas id="particleCanvas" style="display:none;"></canvas>
-
-  <!-- ✅ FIX: loginView ab app-container ke ANDAR hai -->
-  <div class="app-container">
-    <img src="https://i.ibb.co/WNpTL7B6/1000073601.png" alt="UI Preview" class="preview-image"/>
-    <h2 class="promo-text">MAKE YOUR LIFE EASY WITH DRAGO PREDICTOR</h2>
-
-    <div class="action-cards-container">
-      <a href="https://t.me/+t_giD22Lulk0NmE1" target="_blank" class="action-card card-join">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor">
-            <path d="M21.5 2.5L2 11.5l7.5 3.5 3.5 7.5 8.5-20z M9.5 15l1.5 4 1-3.5L19 5.5 9.5 15z"/>
-          </svg>
-        </div>
-        <div class="card-content">
-          <span class="card-title">Join Channel</span>
-          <span class="card-subtitle">• Get latest updates!</span>
-        </div>
-      </a>
-
-      <a href="https://t.me/xx_drago" target="_blank" class="action-card card-support">
-        <div class="card-icon">
-          <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor">
-            <path d="M12 2A10 10 0 0 0 2 12v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H4a8 8 0 0 1 16 0h-2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4A10 10 0 0 0 12 2z"/>
-            <path d="M6 18c0 2.5 2 4 4.5 4h1v-1.5h-1C8.5 20.5 7.5 19.5 7.4 18Z"/>
-          </svg>
-        </div>
-        <div class="card-content">
-          <span class="card-title">Customer &amp;<br>Support</span>
-          <span class="card-subtitle">• We are here to help!</span>
-        </div>
-      </a>
+    <div class="icons-container">
+        <img src="https://i.ibb.co/F46SGwxp/20260613-135424.png" alt="icon1">
+        <img src="https://i.ibb.co/Q3NqLqzc/20260613-135445.png" alt="icon2">
+        <img src="https://i.ibb.co/bRzyS4S1/20260613-135511.png" alt="icon3">
+        <img src="https://i.ibb.co/DDB70BrJ/20260613-135550.png" alt="icon4" class="last-icon">
     </div>
 
-    <!-- ✅ FIX: loginView yahan hai — content ke neeche, normal flow mein -->
-    <div id="loginView" style="display:none;">
-      <button id="googleLoginBtn" class="sub-btn" type="button">
-        <span class="btn-label">✦ Get Started ✦</span>
-      </button>
-      <div id="errorMsg" class="error-msg"></div>
+    <div class="input-box-only" id="inputBox">
+        <span class="utr-stamp">UtR</span>
+        <input type="text" id="userInput" placeholder="Yahan UTR dalein...">
     </div>
 
-  </div><!-- end .app-container -->
+    <!-- Home Circular Button -->
+    <a href="home.html" class="home-btn">➡️</a>
 
-  <script>
-    // ════════════════════════════════════════════════════════
-    //  CONFIG
-    // ════════════════════════════════════════════════════════
-    const API_BASE_URL     = "https://flask-hello-world-nu-sooty-63.vercel.app";
-    const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
-    const SESSION_KEY      = "_qas";
-    const SESSION_TTL_MS   = 30 * 24 * 60 * 60 * 1000;  // 30 din
+    <script>
+        const input = document.getElementById('userInput');
+        const box = document.getElementById('inputBox');
 
-    // ════════════════════════════════════════════════════════
-    //  XOR ENCRYPT / DECRYPT
-    // ════════════════════════════════════════════════════════
-    const _EK = (() => {
-      const parts = [
-        navigator.userAgent.length.toString(16),
-        screen.width.toString(16),
-        screen.height.toString(16),
-        (navigator.hardwareConcurrency || 4).toString(16),
-        new Date().getTimezoneOffset().toString(16)
-      ];
-      return parts.join("").repeat(8).slice(0, 64);
-    })();
-
-    function _xorStr(str, key) {
-      let out = "";
-      for (let i = 0; i < str.length; i++) {
-        out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      }
-      return out;
-    }
-
-    function encryptData(obj) {
-      try {
-        const json  = JSON.stringify(obj);
-        const xored = _xorStr(json, _EK);
-        return btoa(unescape(encodeURIComponent(xored)));
-      } catch(e) { return null; }
-    }
-
-    function decryptData(b64) {
-      try {
-        const xored = decodeURIComponent(escape(atob(b64)));
-        const json  = _xorStr(xored, _EK);
-        return JSON.parse(json);
-      } catch(e) { return null; }
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  PARTICLE CANVAS
-    // ════════════════════════════════════════════════════════
-    (function(){
-      const canvas = document.getElementById("particleCanvas");
-      const ctx    = canvas.getContext("2d");
-      let W, H, pts = [];
-      const COLS = ["#00E5FF","#7C3AED","#22D3EE","#A78BFA"];
-      function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-      function mkp(){
-        return { x:Math.random()*W, y:H+10, r:Math.random()*2+0.5,
-                 speed:Math.random()*0.6+0.3, drift:(Math.random()-0.5)*1.5,
-                 color:COLS[Math.floor(Math.random()*COLS.length)],
-                 alpha:0, life:0, maxLife:Math.random()*200+150 };
-      }
-      function tick(){
-        ctx.clearRect(0,0,W,H);
-        if(pts.length < 45) pts.push(mkp());
-        pts = pts.filter(p => p.life < p.maxLife);
-        pts.forEach(p => {
-          p.life++; p.y -= p.speed; p.x += p.drift*0.3;
-          p.alpha = p.life < 30 ? p.life/30 : p.life > p.maxLife-30 ? (p.maxLife-p.life)/30 : 0.7;
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle=p.color; ctx.globalAlpha=p.alpha*0.6; ctx.fill();
-          const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
-          g.addColorStop(0,p.color+"55"); g.addColorStop(1,p.color+"00");
-          ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);
-          ctx.fillStyle=g; ctx.globalAlpha=p.alpha*0.3; ctx.fill();
-          ctx.globalAlpha=1;
-        });
-        requestAnimationFrame(tick);
-      }
-      window.addEventListener("resize", resize);
-      resize(); tick();
-    })();
-
-    // ════════════════════════════════════════════════════════
-    //  DEVICE FINGERPRINT
-    // ════════════════════════════════════════════════════════
-    function getDeviceFingerprint() {
-      const canvas = document.createElement("canvas");
-      const ctx    = canvas.getContext("2d");
-      ctx.textBaseline = "top";
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "#f60";
-      ctx.fillRect(125, 1, 62, 20);
-      ctx.fillStyle = "#069";
-      ctx.fillText("QA-fp", 2, 15);
-      ctx.fillStyle = "rgba(102,204,0,0.7)";
-      ctx.fillText("QA-fp", 4, 17);
-      const cv = canvas.toDataURL().slice(-60);
-
-      const raw = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width + "x" + screen.height,
-        screen.colorDepth,
-        new Date().getTimezoneOffset(),
-        navigator.hardwareConcurrency || "",
-        navigator.platform || "",
-        cv
-      ].join("|");
-
-      let h = 0x811c9dc5;
-      for (let i = 0; i < raw.length; i++) {
-        h ^= raw.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-        h >>>= 0;
-      }
-      return "dfp_" + h.toString(16);
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  SESSION — save / load / clear
-    // ════════════════════════════════════════════════════════
-    function saveSession(user, deviceId) {
-      const enc = encryptData({
-        e: user.email,
-        u: user.uid,
-        d: deviceId,
-        t: Date.now()
-      });
-      if (enc) localStorage.setItem(SESSION_KEY, enc);
-    }
-
-    function loadSession() {
-      try {
-        const raw = localStorage.getItem(SESSION_KEY);
-        if (!raw) return null;
-        const s = decryptData(raw);
-        if (!s || !s.e || !s.d || !s.t) return null;
-        if (Date.now() - s.t > SESSION_TTL_MS) {
-          localStorage.removeItem(SESSION_KEY);
-          return null;
-        }
-        return s;
-      } catch(e) { return null; }
-    }
-
-    function clearSession() {
-      localStorage.removeItem(SESSION_KEY);
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  UI HELPERS
-    // ════════════════════════════════════════════════════════
-    const loginView      = document.getElementById("loginView");
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const errorMsg       = document.getElementById("errorMsg");
-    const loadingOverlay = document.getElementById("loadingOverlay");
-
-    function hideLoader() {
-      loadingOverlay.style.opacity = "0";
-      setTimeout(() => loadingOverlay.style.display = "none", 300);
-    }
-
-    function showLoginView() {
-      loginView.style.display = "flex";
-      hideLoader();
-    }
-
-    function showError(m) { errorMsg.style.display = "block"; errorMsg.textContent = m; }
-    function hideError()  { errorMsg.style.display = "none";  errorMsg.textContent = ""; }
-
-    function setBtnState(loading) {
-      googleLoginBtn.disabled = loading;
-      googleLoginBtn.querySelector(".btn-label").textContent = loading ? "Verifying..." : "✦ Get Started ✦";
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  AUTO-LOGIN CHECK
-    // ════════════════════════════════════════════════════════
-    function checkAutoLogin() {
-      const s = loadSession();
-      if (s) {
-        const currentDfp = getDeviceFingerprint();
-        if (s.d === currentDfp) {
-          window.location.replace("Payment.html");
-          return true;
-        } else {
-          clearSession();
-        }
-      }
-      return false;
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  GOOGLE TOKEN CLIENT
-    // ════════════════════════════════════════════════════════
-    let tokenClient  = null;
-    let googleReady  = false;
-    let pendingLogin = false;
-
-    function initGoogleClient() {
-      try {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id:      GOOGLE_CLIENT_ID,
-          scope:          "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-          prompt:         "select_account",
-          callback:       async (res) => {
-            if (res && res.access_token) {
-              // Save token temporarily so payment.html can fetch real name+photo from Google
-              try { sessionStorage.setItem("_gat", res.access_token); } catch(e) {}
-              await handleLogin(res.access_token);
-            } else {
-              setBtnState(false);
-              showError("Login cancelled. Dobara try karo.");
+        const timer = setTimeout(() => {
+            if(input.value === "") {
+                box.classList.add('vibrating');
             }
-          },
-          error_callback: (err) => {
-            setBtnState(false);
-            showError("Google error: " + (err.type || "unknown") + ". Dobara try karo.");
-          }
+        }, 10000);
+
+        input.addEventListener('input', () => {
+            clearTimeout(timer);
+            box.classList.remove('vibrating');
         });
-        googleReady = true;
-        if (pendingLogin) {
-          pendingLogin = false;
-          tokenClient.requestAccessToken();
-        }
-      } catch(e) {
-        showError("Google load nahi hua. Page refresh karo.");
-        setBtnState(false);
-      }
-    }
-
-    window.onGoogleLibraryLoad = function() {
-      if (checkAutoLogin()) return;
-      initGoogleClient();
-      showLoginView();
-    };
-
-    let _pollCount = 0;
-    const _poll = setInterval(() => {
-      _pollCount++;
-      if (googleReady) { clearInterval(_poll); return; }
-      if (typeof google !== "undefined" && google.accounts && google.accounts.oauth2) {
-        clearInterval(_poll);
-        if (checkAutoLogin()) return;
-        initGoogleClient();
-        showLoginView();
-      }
-      if (_pollCount > 40) {
-        clearInterval(_poll);
-        showLoginView();
-        showError("Google load nahi hua. Internet check karo ya page refresh karo.");
-      }
-    }, 200);
-
-    // ════════════════════════════════════════════════════════
-    //  MAIN LOGIN HANDLER
-    // ════════════════════════════════════════════════════════
-    async function handleLogin(accessToken) {
-      setBtnState(true);
-      hideError();
-      const deviceId = getDeviceFingerprint();
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/auth`, {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ access_token: accessToken, device_id: deviceId })
-        });
-
-        const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch(e) { data = null; }
-
-        if (res.status === 429) {
-          showError("Bahut zyada requests. 1 minute baad try karo.");
-          setBtnState(false); return;
-        }
-        if (res.status === 503 || res.status === 504) {
-          showError("Server temporarily down. 30 sec baad try karo.");
-          setBtnState(false); return;
-        }
-        if (!res.ok) {
-          showError("Server error (" + res.status + "). Dobara try karo.");
-          setBtnState(false); return;
-        }
-        if (data && data.status === "success" && data.user) {
-          saveSession(data.user, deviceId);
-          // Save name & picture for payment page profile banner
-          try {
-            localStorage.setItem("_ud", JSON.stringify({
-              name: data.user.name || "",
-              picture: data.user.picture || ""
-            }));
-          } catch(e) {}
-          window.location.replace("Payment.html");
-        } else {
-          showError("Login fail hua. Dobara try karo.");
-          setBtnState(false);
-        }
-      } catch(err) {
-        if (!navigator.onLine) {
-          showError("Internet nahi hai. Connection check karo.");
-        } else {
-          showError("Network error. Page refresh karke dobara try karo.");
-        }
-        setBtnState(false);
-      }
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  BUTTON CLICK
-    // ════════════════════════════════════════════════════════
-    googleLoginBtn.addEventListener("click", () => {
-      hideError();
-      if (!googleReady || !tokenClient) {
-        pendingLogin = true;
-        setBtnState(true);
-        googleLoginBtn.querySelector(".btn-label").textContent = "Loading...";
-        return;
-      }
-      setBtnState(true);
-      tokenClient.requestAccessToken();
-    });
-  </script>
+    </script>
 </body>
 </html>
