@@ -26,58 +26,65 @@
         
         .btn { background: linear-gradient(135deg, #7C3AED 0%, #5B6AF0 100%); color: #ffffff; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; width: 100%; box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4); }
 
-        /* ── Profile Banner ── */
+        /* ── Profile Banner — clean, no background ── */
         #profileBanner {
             position: fixed;
-            top: 14px;
+            top: 16px;
             left: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1.5px solid rgba(139,92,246,0.25);
-            border-radius: 50px;
-            padding: 6px 14px 6px 6px;
-            box-shadow: 0 4px 18px rgba(124,58,237,0.15);
+            gap: 9px;
             z-index: 999;
             animation: bannerSlide 0.5s ease-out both;
         }
         @keyframes bannerSlide {
-            from { opacity:0; transform:translateX(-30px); }
-            to   { opacity:1; transform:translateX(0); }
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
         }
-        #profileBanner img {
-            width: 36px;
-            height: 36px;
+        #avatarWrap img {
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #8B5CF6;
-            flex-shrink: 0;
+            display: block;
         }
-        #profileBanner .avatar-fallback {
-            width: 36px;
-            height: 36px;
+        .avatar-fallback {
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: linear-gradient(135deg, #7C3AED, #5B6AF0);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 800;
             color: #fff;
-            flex-shrink: 0;
-            border: 2px solid #8B5CF6;
         }
-        #profileBanner .profile-info { display: flex; flex-direction: column; }
-        #profileBanner .welcome-text { font-size: 9px; font-weight: 600; color: #8B5CF6; text-transform: uppercase; letter-spacing: 0.5px; }
-        #profileBanner .user-name    { font-size: 13px; font-weight: 800; color: #1e1b4b; line-height: 1.2; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #profileBanner .profile-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        #profileBanner .welcome-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: #777;
+        }
+        #profileBanner .user-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
 
-<!-- Profile Banner — top left -->
+<!-- Profile Banner — top left, no background -->
 <div id="profileBanner" style="display:none;">
     <div id="avatarWrap"></div>
     <div class="profile-info">
@@ -132,115 +139,57 @@
         `;
     });
 
-    // Swiper initialization with Auto-Scroll animation
     const swiper = new Swiper('.swiper', {
         loop: true,
         centeredSlides: true,
         slidesPerView: 1.1,
         spaceBetween: 10,
         autoplay: {
-            delay: 500,        // Itni der ruka rahega
+            delay: 500,
             disableOnInteraction: false,
         },
-        speed: 1000,          // Scroll hone ki speed (miliseconds)
+        speed: 1000,
     });
 
-    // Ye code sirf ek baar scroll karke rok dega
     setTimeout(() => {
         swiper.autoplay.stop();
-    }, 2000); // 2 second baad autoplay ruk jayega
+    }, 2000);
 
-    // ── Profile Banner Logic ──
-    (function() {
-        const SESSION_KEY   = "_qas";
-        const SESSION_TTL   = 30 * 24 * 60 * 60 * 1000;
+    // ── Profile Banner ──
+    (function () {
+        try {
+            const ud = JSON.parse(localStorage.getItem("_ud") || "null");
+            if (!ud || !ud.name) return;
 
-        // Same XOR key as index.html
-        const _EK = (() => {
-            const parts = [
-                navigator.userAgent.length.toString(16),
-                screen.width.toString(16),
-                screen.height.toString(16),
-                (navigator.hardwareConcurrency || 4).toString(16),
-                new Date().getTimezoneOffset().toString(16)
-            ];
-            return parts.join("").repeat(8).slice(0, 64);
-        })();
-
-        function xorStr(str, key) {
-            let out = "";
-            for (let i = 0; i < str.length; i++)
-                out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-            return out;
-        }
-
-        function decryptSession(b64) {
-            try {
-                const xored = decodeURIComponent(escape(atob(b64)));
-                return JSON.parse(xorStr(xored, _EK));
-            } catch(e) { return null; }
-        }
-
-        function loadSession() {
-            try {
-                const raw = localStorage.getItem(SESSION_KEY);
-                if (!raw) return null;
-                const s = decryptSession(raw);
-                if (!s || !s.e || !s.t) return null;
-                if (Date.now() - s.t > SESSION_TTL) return null;
-                return s;
-            } catch(e) { return null; }
-        }
-
-        // Fetch full user info from Google using stored token — fallback: use name from session
-        function showBanner(name, picture) {
             const banner   = document.getElementById("profileBanner");
             const nameEl   = document.getElementById("bannerName");
             const avatarEl = document.getElementById("avatarWrap");
 
-            nameEl.textContent = name || "User";
+            // Sirf naam dikhao — email nahi, sirf name field
+            nameEl.textContent = ud.name;
 
-            if (picture) {
+            // Real Google profile photo
+            if (ud.picture) {
                 const img = document.createElement("img");
-                img.src = picture;
-                img.alt = name;
-                img.onerror = () => {
-                    img.remove();
-                    showFallbackAvatar(avatarEl, name);
+                img.src = ud.picture;
+                img.alt = ud.name;
+                img.onerror = function () {
+                    this.remove();
+                    const div = document.createElement("div");
+                    div.className = "avatar-fallback";
+                    div.textContent = ud.name.charAt(0).toUpperCase();
+                    avatarEl.appendChild(div);
                 };
                 avatarEl.appendChild(img);
             } else {
-                showFallbackAvatar(avatarEl, name);
+                const div = document.createElement("div");
+                div.className = "avatar-fallback";
+                div.textContent = ud.name.charAt(0).toUpperCase();
+                avatarEl.appendChild(div);
             }
 
             banner.style.display = "flex";
-        }
-
-        function showFallbackAvatar(el, name) {
-            const div = document.createElement("div");
-            div.className = "avatar-fallback";
-            div.textContent = (name || "U").charAt(0).toUpperCase();
-            el.appendChild(div);
-        }
-
-        // Try to get user data from sessionStorage (set by index.html after login)
-        // index.html stores: { e, u, d, t } — no name/picture in encrypted session
-        // So we also check a plain "userData" key that index.html can set
-        const session = loadSession();
-        if (session) {
-            // Try plain userData cache first
-            try {
-                const ud = JSON.parse(localStorage.getItem("_ud") || "null");
-                if (ud && ud.name) {
-                    showBanner(ud.name, ud.picture);
-                } else {
-                    // Fallback: show email initial
-                    showBanner(session.e ? session.e.split("@")[0] : "User", null);
-                }
-            } catch(e) {
-                showBanner("User", null);
-            }
-        }
+        } catch (e) {}
     })();
 </script>
 </body>
