@@ -39,7 +39,8 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      margin-bottom: 140px;
+      /* ✅ FIX: margin-bottom hataya — ab button normal flow mein hai */
+      margin-bottom: 20px;
     }
 
     .preview-image {
@@ -99,14 +100,14 @@
     .card-title   { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#000; line-height:1.2; }
     .card-subtitle{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:500; color:#64748B; margin-top:1px; white-space:nowrap; }
 
+    /* ✅ FIX: position:fixed hataya — ab normal flow mein hai */
     #loginView {
-      position: fixed;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+      margin-top: 25px;
+      margin-bottom: 40px;
       z-index: 100;
     }
 
@@ -144,7 +145,7 @@
 
     .error-msg { margin-top:14px; font-size:13px; color:#DC2626; text-align:center; font-weight:500; display:none; }
 
-    /* Loading overlay — pehli baar session check ke waqt */
+    /* Loading overlay */
     #loadingOverlay {
       position: fixed;
       inset: 0;
@@ -173,11 +174,12 @@
 </head>
 <body>
 
-  <!-- Loading overlay — session check hone tak dikha -->
+  <!-- Loading overlay -->
   <div id="loadingOverlay"><div class="spinner"></div></div>
 
   <canvas id="particleCanvas" style="display:none;"></canvas>
 
+  <!-- ✅ FIX: loginView ab app-container ke ANDAR hai -->
   <div class="app-container">
     <img src="https://i.ibb.co/WNpTL7B6/1000073601.png" alt="UI Preview" class="preview-image"/>
     <h2 class="promo-text">MAKE YOUR LIFE EASY WITH DRAGO PREDICTOR</h2>
@@ -208,14 +210,16 @@
         </div>
       </a>
     </div>
-  </div>
 
-  <div id="loginView" style="display:none;">
-    <button id="googleLoginBtn" class="sub-btn" type="button">
-      <span class="btn-label">✦ Get Started ✦</span>
-    </button>
-    <div id="errorMsg" class="error-msg"></div>
-  </div>
+    <!-- ✅ FIX: loginView yahan hai — content ke neeche, normal flow mein -->
+    <div id="loginView" style="display:none;">
+      <button id="googleLoginBtn" class="sub-btn" type="button">
+        <span class="btn-label">✦ Get Started ✦</span>
+      </button>
+      <div id="errorMsg" class="error-msg"></div>
+    </div>
+
+  </div><!-- end .app-container -->
 
   <script>
     // ════════════════════════════════════════════════════════
@@ -227,11 +231,9 @@
     const SESSION_TTL_MS   = 30 * 24 * 60 * 60 * 1000;  // 30 din
 
     // ════════════════════════════════════════════════════════
-    //  SIMPLE XOR ENCRYPT / DECRYPT for localStorage
-    //  (prevents casual inspection; not AES but no external lib needed)
+    //  XOR ENCRYPT / DECRYPT
     // ════════════════════════════════════════════════════════
     const _EK = (() => {
-      // Key = device-unique string so even if copied cross-device it won't decrypt
       const parts = [
         navigator.userAgent.length.toString(16),
         screen.width.toString(16),
@@ -252,8 +254,8 @@
 
     function encryptData(obj) {
       try {
-        const json    = JSON.stringify(obj);
-        const xored   = _xorStr(json, _EK);
+        const json  = JSON.stringify(obj);
+        const xored = _xorStr(json, _EK);
         return btoa(unescape(encodeURIComponent(xored)));
       } catch(e) { return null; }
     }
@@ -339,7 +341,7 @@
     }
 
     // ════════════════════════════════════════════════════════
-    //  SESSION — save / load / clear  (encrypted)
+    //  SESSION — save / load / clear
     // ════════════════════════════════════════════════════════
     function saveSession(user, deviceId) {
       const enc = encryptData({
@@ -357,7 +359,6 @@
         if (!raw) return null;
         const s = decryptData(raw);
         if (!s || !s.e || !s.d || !s.t) return null;
-        // 30-din expiry check
         if (Date.now() - s.t > SESSION_TTL_MS) {
           localStorage.removeItem(SESSION_KEY);
           return null;
@@ -397,18 +398,16 @@
     }
 
     // ════════════════════════════════════════════════════════
-    //  AUTO-LOGIN CHECK — runs on page load
+    //  AUTO-LOGIN CHECK
     // ════════════════════════════════════════════════════════
     function checkAutoLogin() {
       const s = loadSession();
       if (s) {
         const currentDfp = getDeviceFingerprint();
         if (s.d === currentDfp) {
-          // Same device — seedha redirect, no Google popup
           window.location.replace("Payment.html");
           return true;
         } else {
-          // Different device — clear stale session
           clearSession();
         }
       }
@@ -452,14 +451,12 @@
       }
     }
 
-    // ── Google ready hone ke baad yeh fire hoga ──────────────
     window.onGoogleLibraryLoad = function() {
       if (checkAutoLogin()) return;
       initGoogleClient();
       showLoginView();
     };
 
-    // ── Fallback polling — kuch browsers mein onGoogleLibraryLoad nahi chalta
     let _pollCount = 0;
     const _poll = setInterval(() => {
       _pollCount++;
@@ -470,7 +467,7 @@
         initGoogleClient();
         showLoginView();
       }
-      if (_pollCount > 40) {   // 8 second baad bhi nahi aaya
+      if (_pollCount > 40) {
         clearInterval(_poll);
         showLoginView();
         showError("Google load nahi hua. Internet check karo ya page refresh karo.");
@@ -478,7 +475,7 @@
     }, 200);
 
     // ════════════════════════════════════════════════════════
-    //  MAIN LOGIN HANDLER — detailed error messages
+    //  MAIN LOGIN HANDLER
     // ════════════════════════════════════════════════════════
     async function handleLogin(accessToken) {
       setBtnState(true);
@@ -492,7 +489,6 @@
           body:    JSON.stringify({ access_token: accessToken, device_id: deviceId })
         });
 
-        // Response text pehle lo — chahe JSON ho ya na ho
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch(e) { data = null; }
@@ -517,7 +513,6 @@
           setBtnState(false);
         }
       } catch(err) {
-        // Network error — no internet or CORS
         if (!navigator.onLine) {
           showError("Internet nahi hai. Connection check karo.");
         } else {
