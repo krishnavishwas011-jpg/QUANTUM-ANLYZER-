@@ -13,10 +13,16 @@
   <title>Quantum Analyzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Faster+One&family=Luckiest+Guy&family=Rubik+Marker+Hatch&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       min-height: 100vh;
@@ -39,8 +45,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      /* ✅ FIX: margin-bottom hataya — ab button normal flow mein hai */
-      margin-bottom: 20px;
+      margin-bottom: 140px;
     }
 
     .preview-image {
@@ -88,26 +93,63 @@
       border-radius: 24px;
       text-decoration: none;
       text-align: left;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
       transition: transform 0.15s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .action-card:active { transform: scale(0.96); }
-    .card-join    { background: linear-gradient(135deg,#e6e9ff 0%,#f1f3ff 100%); border: 1.5px solid #cbd2f6; }
-    .card-support { background: linear-gradient(135deg,#f5f6f8 0%,#ffffff 100%); border: 1.5px solid #e2e8f0; }
-    .card-icon    { color:#000; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .card-content { display:flex; flex-direction:column; }
-    .card-title   { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#000; line-height:1.2; }
-    .card-subtitle{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:500; color:#64748B; margin-top:1px; white-space:nowrap; }
 
-    /* ✅ FIX: position:fixed hataya — ab normal flow mein hai */
+    .action-card:active {
+      transform: scale(0.96);
+    }
+
+    .card-join {
+      background: linear-gradient(135deg, #e6e9ff 0%, #f1f3ff 100%);
+      border: 1.5px solid #cbd2f6;
+    }
+
+    .card-support {
+      background: linear-gradient(135deg, #f5f6f8 0%, #ffffff 100%);
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .card-icon {
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #000000;
+      line-height: 1.2;
+    }
+
+    .card-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748B;
+      margin-top: 1px;
+      white-space: nowrap;
+    }
+
     #loginView {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 100%;
-      margin-top: 25px;
-      margin-bottom: 40px;
       z-index: 100;
     }
 
@@ -125,65 +167,86 @@
       gap: 10px;
       outline: none;
       -webkit-tap-highlight-color: transparent;
-      box-shadow: 0 8px 30px rgba(124,92,252,0.45);
+      box-shadow: 0 8px 30px rgba(124, 92, 252, 0.45);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       animation: btnAppear 0.6s 0.3s both ease-out;
     }
+
     @keyframes btnAppear {
-      from { opacity:0; transform:translateY(20px); }
-      to   { opacity:1; transform:translateY(0); }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .sub-btn:active { transform:scale(0.96); box-shadow:0 4px 16px rgba(124,92,252,0.35); }
+
+    .sub-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 16px rgba(124, 92, 252, 0.35);
+    }
+
+    .sub-btn .crown-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
     .sub-btn .btn-label {
-      color:#fff;
-      font-family:'Space Grotesk',sans-serif;
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:0.3px;
-      white-space:nowrap;
+      color: #ffffff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
-    .error-msg { margin-top:14px; font-size:13px; color:#DC2626; text-align:center; font-weight:500; display:none; }
+    .error-msg { margin-top: 14px; font-size: 13px; color: #DC2626; text-align: center; font-weight: 500; display: none; }
 
-    /* Loading overlay */
-    #loadingOverlay {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(180deg,#c3caff 0%,#e2e5ff 40%,#fff 100%);
-      display: flex;
+    .profile-view {
+      display: none;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      z-index: 999;
-      transition: opacity 0.3s ease;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 24px;
+      padding: 40px 60px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 101;
+      width: 90%;
+      max-width: 360px;
+      animation: fade-up 0.5s ease-out both;
     }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 4px solid rgba(124,92,252,0.2);
-      border-top-color: #7C5CFC;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform:rotate(360deg); } }
 
-    @media (max-width:400px) {
-      .card-title    { font-size:14px; }
-      .card-subtitle { font-size:10px; }
-      .action-card   { padding:10px 12px; }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    .user-avatar { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 2px solid rgba(0,0,0,0.1); }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #00838F; background: rgba(0, 131, 143, 0.08); border: 1px solid rgba(0, 131, 143, 0.2); border-radius: 20px; padding: 4px 12px; margin-bottom: 12px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #00838F; box-shadow: 0 0 6px #00838F; animation: blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .user-name { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+    .user-email { font-size: 14px; color: rgba(0, 0, 0, 0.6); margin-bottom: 50px; }
+    .btn-logout { width: 100%; height: 46px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 14px; color: #DC2626; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-logout:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); color: #B91C1C; }
+
+    @media (max-width: 400px) {
+      .card-title { font-size: 14px; }
+      .card-subtitle { font-size: 10px; }
+      .action-card { padding: 10px 12px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Loading overlay -->
-  <div id="loadingOverlay"><div class="spinner"></div></div>
+  <canvas id="particleCanvas" style="display: none;"></canvas>
 
-  <canvas id="particleCanvas" style="display:none;"></canvas>
-
-  <!-- ✅ FIX: loginView ab app-container ke ANDAR hai -->
   <div class="app-container">
     <img src="https://i.ibb.co/WNpTL7B6/1000073601.png" alt="UI Preview" class="preview-image"/>
     <h2 class="promo-text">MAKE YOUR LIFE EASY WITH DRAGO PREDICTOR</h2>
-
+    
     <div class="action-cards-container">
       <a href="https://t.me/+t_giD22Lulk0NmE1" target="_blank" class="action-card card-join">
         <div class="card-icon">
@@ -196,7 +259,7 @@
           <span class="card-subtitle">• Get latest updates!</span>
         </div>
       </a>
-
+      
       <a href="https://t.me/xx_drago" target="_blank" class="action-card card-support">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" width="34" height="34" fill="currentColor">
@@ -205,72 +268,47 @@
           </svg>
         </div>
         <div class="card-content">
-          <span class="card-title">Customer &amp;<br>Support</span>
+          <span class="card-title">Customer &<br>Support</span>
           <span class="card-subtitle">• We are here to help!</span>
         </div>
       </a>
     </div>
+  </div>
 
-    <!-- ✅ FIX: loginView yahan hai — content ke neeche, normal flow mein -->
-    <div id="loginView" style="display:none;">
-      <button id="googleLoginBtn" class="sub-btn" type="button">
-        <span class="btn-label">✦ Get Started ✦</span>
-      </button>
-      <div id="errorMsg" class="error-msg"></div>
+  <div id="loginView">
+    <button id="googleLoginBtn" class="sub-btn" type="button">
+      <span class="btn-label">✦ Get Started ✦</span>
+    </button>
+    
+    <div id="errorMsg" class="error-msg"></div>
+  </div>
+
+  <div id="profileView" class="profile-view">
+    <img id="userAvatar" src="" alt="avatar" class="user-avatar"/>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Access Authorized
     </div>
-
-  </div><!-- end .app-container -->
+    <div class="user-name" id="userName">--</div>
+    <div class="user-email" id="userEmail">--</div>
+    <button class="btn-logout" id="logoutBtn" type="button">Sign Out</button>
+  </div>
 
   <script>
-    // ════════════════════════════════════════════════════════
-    //  CONFIG
-    // ════════════════════════════════════════════════════════
-    const API_BASE_URL     = "https://flask-hello-world-nu-sooty-63.vercel.app";
+    const API_BASE_URL    = "https://flask-hello-world-nu-sooty-63.vercel.app";
     const GOOGLE_CLIENT_ID = "1066810347341-9jc6gt17evnbv09di21eq95d42itv49a.apps.googleusercontent.com";
-    const SESSION_KEY      = "_qas";
-    const SESSION_TTL_MS   = 30 * 24 * 60 * 60 * 1000;  // 30 din
 
-    // ════════════════════════════════════════════════════════
-    //  XOR ENCRYPT / DECRYPT
-    // ════════════════════════════════════════════════════════
-    const _EK = (() => {
-      const parts = [
-        navigator.userAgent.length.toString(16),
-        screen.width.toString(16),
-        screen.height.toString(16),
-        (navigator.hardwareConcurrency || 4).toString(16),
-        new Date().getTimezoneOffset().toString(16)
-      ];
-      return parts.join("").repeat(8).slice(0, 64);
-    })();
+    let session = { user: null, signature: null };
 
-    function _xorStr(str, key) {
-      let out = "";
-      for (let i = 0; i < str.length; i++) {
-        out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      }
-      return out;
-    }
+    const loginView      = document.getElementById("loginView");
+    const profileView    = document.getElementById("profileView");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const logoutBtn      = document.getElementById("logoutBtn");
+    const errorMsg       = document.getElementById("errorMsg");
+    const userAvatar     = document.getElementById("userAvatar");
+    const userName       = document.getElementById("userName");
+    const userEmail      = document.getElementById("userEmail");
 
-    function encryptData(obj) {
-      try {
-        const json  = JSON.stringify(obj);
-        const xored = _xorStr(json, _EK);
-        return btoa(unescape(encodeURIComponent(xored)));
-      } catch(e) { return null; }
-    }
-
-    function decryptData(b64) {
-      try {
-        const xored = decodeURIComponent(escape(atob(b64)));
-        const json  = _xorStr(xored, _EK);
-        return JSON.parse(json);
-      } catch(e) { return null; }
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  PARTICLE CANVAS
-    // ════════════════════════════════════════════════════════
     (function(){
       const canvas = document.getElementById("particleCanvas");
       const ctx    = canvas.getContext("2d");
@@ -291,8 +329,8 @@
           p.life++; p.y -= p.speed; p.x += p.drift*0.3;
           p.alpha = p.life < 30 ? p.life/30 : p.life > p.maxLife-30 ? (p.maxLife-p.life)/30 : 0.7;
           ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle=p.color; ctx.globalAlpha=p.alpha*0.6; ctx.fill();
-          const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
+          ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha*0.6; ctx.fill();
+          const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
           g.addColorStop(0,p.color+"55"); g.addColorStop(1,p.color+"00");
           ctx.beginPath(); ctx.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);
           ctx.fillStyle=g; ctx.globalAlpha=p.alpha*0.3; ctx.fill();
@@ -304,237 +342,64 @@
       resize(); tick();
     })();
 
-    // ════════════════════════════════════════════════════════
-    //  DEVICE FINGERPRINT
-    // ════════════════════════════════════════════════════════
-    function getDeviceFingerprint() {
-      const canvas = document.createElement("canvas");
-      const ctx    = canvas.getContext("2d");
-      ctx.textBaseline = "top";
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "#f60";
-      ctx.fillRect(125, 1, 62, 20);
-      ctx.fillStyle = "#069";
-      ctx.fillText("QA-fp", 2, 15);
-      ctx.fillStyle = "rgba(102,204,0,0.7)";
-      ctx.fillText("QA-fp", 4, 17);
-      const cv = canvas.toDataURL().slice(-60);
-
-      const raw = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width + "x" + screen.height,
-        screen.colorDepth,
-        new Date().getTimezoneOffset(),
-        navigator.hardwareConcurrency || "",
-        navigator.platform || "",
-        cv
-      ].join("|");
-
-      let h = 0x811c9dc5;
-      for (let i = 0; i < raw.length; i++) {
-        h ^= raw.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-        h >>>= 0;
-      }
-      return "dfp_" + h.toString(16);
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  SESSION — save / load / clear
-    // ════════════════════════════════════════════════════════
-    function saveSession(user, deviceId) {
-      const enc = encryptData({
-        e: user.email,
-        u: user.uid,
-        d: deviceId,
-        t: Date.now()
+    let tokenClient;
+    function initGoogle(){
+      if(typeof google==="undefined"){setTimeout(initGoogle,100);return;}
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+        callback: async (res) => { if(res?.access_token) await handleLogin(res.access_token); }
       });
-      if (enc) localStorage.setItem(SESSION_KEY, enc);
     }
+    window.addEventListener("load", initGoogle);
 
-    function loadSession() {
+    function showError(m){ errorMsg.style.display="block"; errorMsg.textContent=m; }
+    function hideError(){ errorMsg.style.display="none"; errorMsg.textContent=""; }
+
+    function renderLoggedIn(user){
+      loginView.style.display   = "none";
+      profileView.style.display = "flex";
+      userName.textContent  = user.name  || "Quantum User";
+      userEmail.textContent = user.email || "";
+      userAvatar.src = (user.picture && user.picture.startsWith("https://"))
+        ? user.picture
+        : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+    }
+    function renderLoggedOut(){ profileView.style.display="none"; loginView.style.display="flex"; }
+
+    async function handleLogin(accessToken){
+      googleLoginBtn.disabled = true; hideError();
       try {
-        const raw = localStorage.getItem(SESSION_KEY);
-        if (!raw) return null;
-        const s = decryptData(raw);
-        if (!s || !s.e || !s.d || !s.t) return null;
-        if (Date.now() - s.t > SESSION_TTL_MS) {
-          localStorage.removeItem(SESSION_KEY);
-          return null;
-        }
-        return s;
-      } catch(e) { return null; }
-    }
-
-    function clearSession() {
-      localStorage.removeItem(SESSION_KEY);
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  UI HELPERS
-    // ════════════════════════════════════════════════════════
-    const loginView      = document.getElementById("loginView");
-    const googleLoginBtn = document.getElementById("googleLoginBtn");
-    const errorMsg       = document.getElementById("errorMsg");
-    const loadingOverlay = document.getElementById("loadingOverlay");
-
-    function hideLoader() {
-      loadingOverlay.style.opacity = "0";
-      setTimeout(() => loadingOverlay.style.display = "none", 300);
-    }
-
-    function showLoginView() {
-      loginView.style.display = "flex";
-      hideLoader();
-    }
-
-    function showError(m) { errorMsg.style.display = "block"; errorMsg.textContent = m; }
-    function hideError()  { errorMsg.style.display = "none";  errorMsg.textContent = ""; }
-
-    function setBtnState(loading) {
-      googleLoginBtn.disabled = loading;
-      googleLoginBtn.querySelector(".btn-label").textContent = loading ? "Verifying..." : "✦ Get Started ✦";
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  AUTO-LOGIN CHECK
-    // ════════════════════════════════════════════════════════
-    function checkAutoLogin() {
-      const s = loadSession();
-      if (s) {
-        const currentDfp = getDeviceFingerprint();
-        if (s.d === currentDfp) {
-          window.location.replace("Payment.html");
-          return true;
-        } else {
-          clearSession();
-        }
-      }
-      return false;
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  GOOGLE TOKEN CLIENT
-    // ════════════════════════════════════════════════════════
-    let tokenClient  = null;
-    let googleReady  = false;
-    let pendingLogin = false;
-
-    function initGoogleClient() {
-      try {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id:      GOOGLE_CLIENT_ID,
-          scope:          "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-          prompt:         "select_account",
-          callback:       async (res) => {
-            if (res && res.access_token) {
-              await handleLogin(res.access_token);
-            } else {
-              setBtnState(false);
-              showError("Login cancelled. Dobara try karo.");
-            }
-          },
-          error_callback: (err) => {
-            setBtnState(false);
-            showError("Google error: " + (err.type || "unknown") + ". Dobara try karo.");
-          }
+        const res  = await fetch(`${API_BASE_URL}/api/auth`,{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({access_token:accessToken})
         });
-        googleReady = true;
-        if (pendingLogin) {
-          pendingLogin = false;
-          tokenClient.requestAccessToken();
-        }
-      } catch(e) {
-        showError("Google load nahi hua. Page refresh karo.");
-        setBtnState(false);
-      }
+        if(!res.ok) throw new Error();
+        const data = await res.json();
+        if(data.status==="success" && data.user){
+          session = { user:data.user, signature:data.session_signature };
+          // Payment.html ke liye user data save karo
+          sessionStorage.setItem("qUser", JSON.stringify(data.user));
+          sessionStorage.setItem("qSig", data.session_signature);
+          renderLoggedIn(data.user);
+          // 800ms baad Payment.html pe redirect
+          setTimeout(() => { window.location.href = "Payment.html"; }, 800);
+        } else throw new Error();
+      } catch { showError("Authentication failed. Please try again."); }
+      finally { googleLoginBtn.disabled = false; }
     }
 
-    window.onGoogleLibraryLoad = function() {
-      if (checkAutoLogin()) return;
-      initGoogleClient();
-      showLoginView();
-    };
-
-    let _pollCount = 0;
-    const _poll = setInterval(() => {
-      _pollCount++;
-      if (googleReady) { clearInterval(_poll); return; }
-      if (typeof google !== "undefined" && google.accounts && google.accounts.oauth2) {
-        clearInterval(_poll);
-        if (checkAutoLogin()) return;
-        initGoogleClient();
-        showLoginView();
-      }
-      if (_pollCount > 40) {
-        clearInterval(_poll);
-        showLoginView();
-        showError("Google load nahi hua. Internet check karo ya page refresh karo.");
-      }
-    }, 200);
-
-    // ════════════════════════════════════════════════════════
-    //  MAIN LOGIN HANDLER
-    // ════════════════════════════════════════════════════════
-    async function handleLogin(accessToken) {
-      setBtnState(true);
-      hideError();
-      const deviceId = getDeviceFingerprint();
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/auth`, {
-          method:  "POST",
-          headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ access_token: accessToken, device_id: deviceId })
-        });
-
-        const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch(e) { data = null; }
-
-        if (res.status === 429) {
-          showError("Bahut zyada requests. 1 minute baad try karo.");
-          setBtnState(false); return;
-        }
-        if (res.status === 503 || res.status === 504) {
-          showError("Server temporarily down. 30 sec baad try karo.");
-          setBtnState(false); return;
-        }
-        if (!res.ok) {
-          showError("Server error (" + res.status + "). Dobara try karo.");
-          setBtnState(false); return;
-        }
-        if (data && data.status === "success" && data.user) {
-          saveSession(data.user, deviceId);
-          window.location.replace("Payment.html");
-        } else {
-          showError("Login fail hua. Dobara try karo.");
-          setBtnState(false);
-        }
-      } catch(err) {
-        if (!navigator.onLine) {
-          showError("Internet nahi hai. Connection check karo.");
-        } else {
-          showError("Network error. Page refresh karke dobara try karo.");
-        }
-        setBtnState(false);
-      }
-    }
-
-    // ════════════════════════════════════════════════════════
-    //  BUTTON CLICK
-    // ════════════════════════════════════════════════════════
     googleLoginBtn.addEventListener("click", () => {
       hideError();
-      if (!googleReady || !tokenClient) {
-        pendingLogin = true;
-        setBtnState(true);
-        googleLoginBtn.querySelector(".btn-label").textContent = "Loading...";
-        return;
-      }
-      setBtnState(true);
+      if(!tokenClient){ showError("Google services loading. Please wait."); return; }
+      googleLoginBtn.disabled = true;
       tokenClient.requestAccessToken();
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      session = {user:null,signature:null};
+      if(typeof google!=="undefined") google.accounts.oauth2.revoke();
+      renderLoggedOut();
     });
   </script>
 </body>
