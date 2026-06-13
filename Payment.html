@@ -26,29 +26,29 @@
         
         .btn { background: linear-gradient(135deg, #7C3AED 0%, #5B6AF0 100%); color: #ffffff; border: none; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; width: 100%; box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4); }
 
-        /* Welcome Card - Top Left */
-        .welcome-card {
+        /* ── Profile Banner ── */
+        #profileBanner {
             position: fixed;
-            top: 16px;
-            left: 16px;
+            top: 14px;
+            left: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255,255,255,0.85);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(139, 92, 246, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(139,92,246,0.25);
             border-radius: 50px;
-            padding: 7px 16px 7px 7px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 6px 14px 6px 6px;
+            box-shadow: 0 4px 18px rgba(124,58,237,0.15);
             z-index: 999;
-            animation: slideIn 0.5s ease-out both;
-            max-width: calc(100vw - 32px);
+            animation: bannerSlide 0.5s ease-out both;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to   { opacity: 1; transform: translateX(0); }
+        @keyframes bannerSlide {
+            from { opacity:0; transform:translateX(-30px); }
+            to   { opacity:1; transform:translateX(0); }
         }
-        .welcome-avatar {
+        #profileBanner img {
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -56,34 +56,33 @@
             border: 2px solid #8B5CF6;
             flex-shrink: 0;
         }
-        .welcome-text { display: flex; flex-direction: column; overflow: hidden; }
-        .welcome-label {
-            font-size: 9px;
-            font-weight: 700;
-            color: #8B5CF6;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1;
-        }
-        .welcome-name {
-            font-size: 13px;
+        #profileBanner .avatar-fallback {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7C3AED, #5B6AF0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
             font-weight: 800;
-            color: #1E293B;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 160px;
+            color: #fff;
+            flex-shrink: 0;
+            border: 2px solid #8B5CF6;
         }
+        #profileBanner .profile-info { display: flex; flex-direction: column; }
+        #profileBanner .welcome-text { font-size: 9px; font-weight: 600; color: #8B5CF6; text-transform: uppercase; letter-spacing: 0.5px; }
+        #profileBanner .user-name    { font-size: 13px; font-weight: 800; color: #1e1b4b; line-height: 1.2; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-<!-- Welcome Card - Top Left -->
-<div class="welcome-card" id="welcomeCard" style="display:none;">
-    <img class="welcome-avatar" id="wcAvatar" src="" alt="avatar"/>
-    <div class="welcome-text">
-        <span class="welcome-label">Welcome,</span>
-        <span class="welcome-name" id="wcName">User</span>
+<!-- Profile Banner — top left -->
+<div id="profileBanner" style="display:none;">
+    <div id="avatarWrap"></div>
+    <div class="profile-info">
+        <span class="welcome-text">Welcome,</span>
+        <span class="user-name" id="bannerName">User</span>
     </div>
 </div>
 
@@ -150,24 +149,98 @@
     setTimeout(() => {
         swiper.autoplay.stop();
     }, 2000); // 2 second baad autoplay ruk jayega
-</script>
-<script>
-    // SessionStorage se user data load karo
-    (function(){
-        try {
-            const userData = sessionStorage.getItem("qUser");
-            if(!userData) return;
-            const user = JSON.parse(userData);
-            const card   = document.getElementById("welcomeCard");
-            const avatar = document.getElementById("wcAvatar");
-            const name   = document.getElementById("wcName");
-            if(user.name) name.textContent = user.name.toUpperCase();
-            avatar.src = (user.picture && user.picture.startsWith("https://"))
-                ? user.picture
-                : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            avatar.onerror = () => { avatar.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; };
-            card.style.display = "flex";
-        } catch(e) { console.log("User data load error:", e); }
+
+    // ── Profile Banner Logic ──
+    (function() {
+        const SESSION_KEY   = "_qas";
+        const SESSION_TTL   = 30 * 24 * 60 * 60 * 1000;
+
+        // Same XOR key as index.html
+        const _EK = (() => {
+            const parts = [
+                navigator.userAgent.length.toString(16),
+                screen.width.toString(16),
+                screen.height.toString(16),
+                (navigator.hardwareConcurrency || 4).toString(16),
+                new Date().getTimezoneOffset().toString(16)
+            ];
+            return parts.join("").repeat(8).slice(0, 64);
+        })();
+
+        function xorStr(str, key) {
+            let out = "";
+            for (let i = 0; i < str.length; i++)
+                out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            return out;
+        }
+
+        function decryptSession(b64) {
+            try {
+                const xored = decodeURIComponent(escape(atob(b64)));
+                return JSON.parse(xorStr(xored, _EK));
+            } catch(e) { return null; }
+        }
+
+        function loadSession() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return null;
+                const s = decryptSession(raw);
+                if (!s || !s.e || !s.t) return null;
+                if (Date.now() - s.t > SESSION_TTL) return null;
+                return s;
+            } catch(e) { return null; }
+        }
+
+        // Fetch full user info from Google using stored token — fallback: use name from session
+        function showBanner(name, picture) {
+            const banner   = document.getElementById("profileBanner");
+            const nameEl   = document.getElementById("bannerName");
+            const avatarEl = document.getElementById("avatarWrap");
+
+            nameEl.textContent = name || "User";
+
+            if (picture) {
+                const img = document.createElement("img");
+                img.src = picture;
+                img.alt = name;
+                img.onerror = () => {
+                    img.remove();
+                    showFallbackAvatar(avatarEl, name);
+                };
+                avatarEl.appendChild(img);
+            } else {
+                showFallbackAvatar(avatarEl, name);
+            }
+
+            banner.style.display = "flex";
+        }
+
+        function showFallbackAvatar(el, name) {
+            const div = document.createElement("div");
+            div.className = "avatar-fallback";
+            div.textContent = (name || "U").charAt(0).toUpperCase();
+            el.appendChild(div);
+        }
+
+        // Try to get user data from sessionStorage (set by index.html after login)
+        // index.html stores: { e, u, d, t } — no name/picture in encrypted session
+        // So we also check a plain "userData" key that index.html can set
+        const session = loadSession();
+        if (session) {
+            // Try plain userData cache first
+            try {
+                const ud = JSON.parse(localStorage.getItem("_ud") || "null");
+                if (ud && ud.name) {
+                    showBanner(ud.name, ud.picture);
+                } else {
+                    // Fallback: show email initial
+                    showBanner(session.e ? session.e.split("@")[0] : "User", null);
+                }
+            } catch(e) {
+                showBanner("User", null);
+            }
+        }
     })();
 </script>
 </body>
