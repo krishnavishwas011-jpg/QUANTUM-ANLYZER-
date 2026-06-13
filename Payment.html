@@ -290,6 +290,52 @@
         }
         .utr-status-msg.success { color: #059669; display: block; }
         .utr-status-msg.error { color: #DC2626; display: block; }
+
+        /* ── App redirect loading overlay ── */
+        #appLoadingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,24,39,0.55);
+            z-index: 2500;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #appLoadingOverlay.show { display: flex; }
+        .app-loader-ring-wrap {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .app-loader-ring-wrap::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.25);
+            border-top-color: #fff;
+            animation: appRingSpin 0.8s linear infinite;
+        }
+        .app-loader-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            object-fit: contain;
+            background: #fff;
+            padding: 6px;
+        }
+        @keyframes appRingSpin { to { transform: rotate(360deg); } }
+        .app-loader-text {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 16px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -346,6 +392,14 @@
 
         <button class="close-btn" onclick="closePayModal()">Close</button>
     </div>
+</div>
+
+<!-- App redirect loading overlay -->
+<div id="appLoadingOverlay">
+    <div class="app-loader-ring-wrap">
+        <img id="appLoaderLogo" class="app-loader-logo" src="" alt="">
+    </div>
+    <div class="app-loader-text" id="appLoaderText">Opening app...</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -543,12 +597,15 @@
 
             const params = `pa=${encodeURIComponent(plan.upi)}&pn=${encodeURIComponent(payeeName)}&am=${encodeURIComponent(amount)}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-            appsRow.innerHTML = apps.map(app => `
-                <a class="upi-app-btn" href="${app.scheme}?${params}">
+            appsRow.innerHTML = apps.map((app, i) => `
+                <a class="upi-app-btn" href="javascript:void(0)" onclick="openUpiApp(${i})">
                     <img src="${app.icon}" alt="${app.name}" onerror="this.style.display='none'">
                     <span>${app.name}</span>
                 </a>
             `).join('');
+
+            window._upiApps = apps;
+            window._upiParams = params;
         } else {
             appsRow.style.display = 'none';
             noUpiMsg.style.display = 'block';
@@ -559,6 +616,69 @@
 
     window.closePayModal = function() {
         document.getElementById('payModalOverlay').classList.remove('show');
+    };
+
+    // ════════════════════════════════════════════════════════
+    //  OPEN UPI APP — show loading overlay until app opens
+    // ════════════════════════════════════════════════════════
+    let appLoadingTimeout = null;
+
+    function hideAppLoadingOverlay() {
+        document.getElementById('appLoadingOverlay').classList.remove('show');
+        if (appLoadingTimeout) {
+            clearTimeout(appLoadingTimeout);
+            appLoadingTimeout = null;
+        }
+        document.removeEventListener('visibilitychange', onVisibilityChangeHideOverlay);
+        window.removeEventListener('pagehide', hideAppLoadingOverlay);
+        window.removeEventListener('blur', onVisibilityChangeHideOverlay);
+    }
+
+    function onVisibilityChangeHideOverlay() {
+        if (document.hidden) {
+            hideAppLoadingOverlay();
+        }
+    }
+
+    window.openUpiApp = function(idx) {
+        const apps = window._upiApps;
+        const params = window._upiParams;
+        if (!apps || !apps[idx]) return;
+
+        const app = apps[idx];
+        const link = `${app.scheme}?${params}`;
+        const fallbackLink = `upi://pay?${params}`;
+
+        const overlay = document.getElementById('appLoadingOverlay');
+        const logo = document.getElementById('appLoaderLogo');
+        const text = document.getElementById('appLoaderText');
+
+        logo.src = app.icon;
+        text.textContent = `Opening ${app.name}...`;
+        overlay.classList.add('show');
+
+        // Hide overlay automatically when the page loses focus (app opened)
+        document.addEventListener('visibilitychange', onVisibilityChangeHideOverlay);
+        window.addEventListener('pagehide', hideAppLoadingOverlay);
+        window.addEventListener('blur', onVisibilityChangeHideOverlay);
+
+        // If the app-specific scheme didn't open anything within 1.5s
+        // (page is still visible), try the universal upi://pay intent.
+        const fallbackTimer = setTimeout(() => {
+            if (!document.hidden) {
+                window.location.href = fallbackLink;
+            }
+        }, 1500);
+
+        // Final fallback: hide overlay after 6 seconds no matter what
+        appLoadingTimeout = setTimeout(() => {
+            clearTimeout(fallbackTimer);
+            hideAppLoadingOverlay();
+        }, 6000);
+
+        // Trigger the app-specific deep link IMMEDIATELY (must stay inside
+        // the synchronous user-gesture call chain, or mobile browsers block it)
+        window.location.href = link;
     };
 
     window.submitUtr = async function() {
